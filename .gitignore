@@ -3,4 +3,4 @@
 *.pem
 
 # ignore test_data folder
-/test_data
+/_test_data

@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"encoding/binary"
@@ -24,7 +24,7 @@ func makeFileHeader(p15File []byte) ([]byte, error) {
 	// *(uint32_t *)(buf + 220) = (int32_t)calc_cksum(0, buf + 228, fileSize); // checksum of the original file
 	// *(uint32_t *)(buf + 224) = (int32_t)calc_cksum(0, buf, 224); // checksum of the APC header
 
-	// NOTE: This line is unused as it seems the APC tool code always writes this as a 1 for 2,048 bit
+	// NOTE: This line is unused as it seems the APC CLI tool v1.0.0 code always writes this as a 1 (regardless of key length)
 	// 		*(uint32_t *)(buf + 208) = keySize; // 1 for 1024 key, otherwise (2048 bit) 2
 	// Unsure why this was in original code but seems irrelevant
 

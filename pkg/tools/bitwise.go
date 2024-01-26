@@ -1,7 +1,7 @@
-package main
+package tools
 
-// bitwiseComplimentOf returns the bitwise compliment of data
-func bitwiseComplimentOf(data []byte) []byte {
+// BitwiseComplimentOf returns the bitwise compliment of data
+func BitwiseComplimentOf(data []byte) []byte {
 	compliment := []byte{}
 
 	for i := range data {
@@ -11,9 +11,9 @@ func bitwiseComplimentOf(data []byte) []byte {
 	return compliment
 }
 
-// isBitwiseCompliment returns true if data1 and data2 are bitwise compliments,
+// IsBitwiseCompliment returns true if data1 and data2 are bitwise compliments,
 // otherwise it returns false
-func isBitwiseCompliment(data1, data2 []byte) bool {
+func IsBitwiseCompliment(data1, data2 []byte) bool {
 	// if not same length, definitely not compliments
 	if len(data1) != len(data2) {
 		return false
