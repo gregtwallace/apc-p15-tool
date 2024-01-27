@@ -73,6 +73,7 @@ func (p15 *pkcs15KeyCert) encryptedKeyEnvelope() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	wrappedCEK = append(wrappedCEK, cekPadding...)
 
 	// double encrypt CEK
@@ -102,7 +103,9 @@ func (p15 *pkcs15KeyCert) encryptedKeyEnvelope() ([]byte, error) {
 		return nil, err
 	}
 
+	// envelope content (that will be encrypted)
 	content := p15.privateKeyObject()
+
 	// pad content, see: https://datatracker.ietf.org/doc/html/rfc3852 6.3
 	contentPadLen := uint8(contentDesCipher.BlockSize() - (len(content) % contentDesCipher.BlockSize()))
 	// ALWAYS pad, if content is exact, add full block of padding

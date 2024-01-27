@@ -2,7 +2,6 @@ package app
 
 import (
 	"apc-p15-tool/pkg/pkcs15"
-	"encoding/base64"
 	"os"
 
 	"go.uber.org/zap"
@@ -59,7 +58,21 @@ func Start() {
 	}
 
 	// app.logger.Debug(hex.EncodeToString(p15File))
-	app.logger.Debug(base64.RawStdEncoding.EncodeToString(p15File))
+	// app.logger.Debug(base64.RawStdEncoding.EncodeToString(p15File))
+
+	apcHeader, err := makeFileHeader(p15File)
+	if err != nil {
+		app.logger.Fatalf("failed to make p15 file header (%s)", err)
+		// FATAL
+	}
+
+	apcFile := append(apcHeader, p15File...)
+
+	err = os.WriteFile("./apctool.p15", apcFile, 0777)
+	if err != nil {
+		app.logger.Fatalf("failed to write apc p15 file (%s)", err)
+		// FATAL
+	}
 
 	// TEMP TEMP TEMP
 }
