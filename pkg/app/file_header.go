@@ -58,17 +58,18 @@ func makeFileHeader(p15File []byte) ([]byte, error) {
 	// check sums (CRC Table)
 	checksumTable := crc16.MakeTable(crc16.CRC16_XMODEM)
 
+	// NOTE: 16 bit checksums are moved to 32 bit int with sign-extension by converting
+	// to int16 and then to uint32
+
 	// file checksum
 	fileChecksum := make([]byte, 4)
-	binary.LittleEndian.PutUint16(fileChecksum, crc16.Checksum(p15File, checksumTable))
+	binary.LittleEndian.PutUint32(fileChecksum, uint32(int16(crc16.Checksum(p15File, checksumTable))))
 	copy(header[220:], fileChecksum)
 
 	// header checksum
 	headerChecksum := make([]byte, 4)
-	binary.LittleEndian.PutUint16(headerChecksum, crc16.Checksum(header[:224], checksumTable))
+	binary.LittleEndian.PutUint32(headerChecksum, uint32(int16(crc16.Checksum(header[:224], checksumTable))))
 	copy(header[224:], headerChecksum)
-
-	// this was in original code but
 
 	return header, nil
 }
