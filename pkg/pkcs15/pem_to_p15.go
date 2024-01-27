@@ -101,7 +101,6 @@ func (p15 *pkcs15KeyCert) toP15PrivateKey() ([]byte, error) {
 // NOTE: Do not use this to try and turn just a cert into a p15. I don't believe,
 // such a thing is permissible under the spec.
 func (p15 *pkcs15KeyCert) toP15Cert() ([]byte, error) {
-
 	// cert object
 	cert := asn1obj.Sequence([][]byte{
 		// commonObjectAttributes - Label
@@ -114,11 +113,23 @@ func (p15 *pkcs15KeyCert) toP15Cert() ([]byte, error) {
 			// additional keyids
 			asn1obj.ExplicitCompound(2, [][]byte{
 				p15.keyIdInt2(),
-				// p15.keyIdInt3(),
-				// p15.keyIdInt6(),
-				// p15.keyIdInt7(),
-				// p15.keyIdInt8(),
-				// p15.keyIdInt9(),
+				p15.keyIdInt3(),
+				p15.keyIdInt6(),
+				p15.keyIdInt7(),
+				p15.keyIdInt8(),
+				p15.keyIdInt9(),
+			}),
+			// CommonKeyAttributes - startDate
+			asn1obj.GeneralizedTime(p15.cert.NotBefore),
+			// CommonKeyAttributes - [4] endDate
+			asn1obj.GeneralizedTimeExplicitValue(4, p15.cert.NotAfter),
+		}),
+		// actual certificate itself
+		asn1obj.ExplicitCompound(1, [][]byte{
+			asn1obj.Sequence([][]byte{
+				asn1obj.ExplicitCompound(0, [][]byte{
+					p15.cert.Raw,
+				}),
 			}),
 		}),
 	})
