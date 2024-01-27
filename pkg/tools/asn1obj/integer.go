@@ -15,3 +15,20 @@ func Integer(bigInt *big.Int) []byte {
 
 	return asn1result
 }
+
+// IntegerExplicitValue returns bigInt encoded as an Integer, however
+// instead of tagging it with Integer it is instead tagged with an
+// explicit tag of the specified tag number
+func IntegerExplicitValue(explicitTagNumber int, bigInt *big.Int) []byte {
+	intBytes := Integer(bigInt)
+
+	asn1Obj := asn1.RawValue{}
+	rest, err := asn1.Unmarshal(intBytes, &asn1Obj)
+	if err != nil {
+		panic(err)
+	} else if len(rest) > 0 {
+		panic("invalid extra data")
+	}
+
+	return ExplicitValue(explicitTagNumber, asn1Obj.Bytes)
+}
