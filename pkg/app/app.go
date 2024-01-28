@@ -1,15 +1,25 @@
 package app
 
 import (
-	"apc-p15-tool/pkg/pkcs15"
+	"context"
+	"errors"
 	"os"
 
+	"github.com/peterbourgon/ff/v4"
+	"github.com/peterbourgon/ff/v4/ffhelp"
 	"go.uber.org/zap"
+)
+
+const (
+	appVersion = "0.1.0"
+
+	environmentVarPrefix = "APC_P15_TOOL"
 )
 
 // struct for receivers to use common app pieces
 type app struct {
 	logger *zap.SugaredLogger
+	cmd    *ff.Command
 	config *config
 }
 
@@ -27,52 +37,40 @@ func Start() {
 	// re-init logger with configured log level
 	app.logger = makeZapLogger(app.config.logLevel)
 
-	// break point for building additional alternate functions
+	// log start
+	app.logger.Infof("apc-p15-tool v%s", appVersion)
 
-	// function: make p15 from pem files
+	// get config
+	app.getConfig()
 
-	// Read in PEM files
-	keyPem, err := os.ReadFile(*app.config.keyPemFilePath)
+	// run it
+	exitCode := 0
+	err := app.cmd.ParseAndRun(context.Background(), os.Args[1:], ff.WithEnvVarPrefix(environmentVarPrefix))
 	if err != nil {
-		app.logger.Fatalf("failed to read key file (%s)", err)
-		// FATAL
+		exitCode = 1
+
+		if errors.Is(err, ff.ErrHelp) {
+			// help explicitly requested
+			exitCode = 0
+			app.logger.Info("\n\n", ffhelp.Command(app.cmd))
+
+		} else if errors.Is(err, ErrExtraArgs) {
+			// extra args (will log elsewhere, so no need to log err again)
+			app.logger.Info("\n\n", ffhelp.Command(app.cmd))
+
+		} else if errors.Is(err, ff.ErrDuplicateFlag) ||
+			errors.Is(err, ff.ErrUnknownFlag) ||
+			errors.Is(err, ff.ErrNoExec) {
+			// other error that suggests user needs to see help
+			app.logger.Error(err)
+			app.logger.Info("\n\n", ffhelp.Command(app.cmd))
+
+		} else {
+			// any other error
+			app.logger.Error(err)
+		}
 	}
 
-	certPem, err := os.ReadFile(*app.config.certPemFilePath)
-	if err != nil {
-		app.logger.Fatalf("failed to read cert file (%s)", err)
-		// FATAL
-	}
-
-	p15, err := pkcs15.ParsePEMToPKCS15(keyPem, certPem)
-	if err != nil {
-		app.logger.Fatalf("failed to parse pem files (%s)", err)
-		// FATAL
-	}
-
-	// TEMP TEMP TEMP
-	p15File, err := p15.ToP15File()
-	if err != nil {
-		app.logger.Fatalf("failed to make p15 file (%s)", err)
-		// FATAL
-	}
-
-	// app.logger.Debug(hex.EncodeToString(p15File))
-	// app.logger.Debug(base64.RawStdEncoding.EncodeToString(p15File))
-
-	apcHeader, err := makeFileHeader(p15File)
-	if err != nil {
-		app.logger.Fatalf("failed to make p15 file header (%s)", err)
-		// FATAL
-	}
-
-	apcFile := append(apcHeader, p15File...)
-
-	err = os.WriteFile("./apctool.p15", apcFile, 0777)
-	if err != nil {
-		app.logger.Fatalf("failed to write apc p15 file (%s)", err)
-		// FATAL
-	}
-
-	// TEMP TEMP TEMP
+	app.logger.Info("apc-p15-tool done")
+	os.Exit(exitCode)
 }
