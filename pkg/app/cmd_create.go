@@ -1,7 +1,6 @@
 package app
 
 import (
-	"apc-p15-tool/pkg/pkcs15"
 	"context"
 	"errors"
 	"fmt"
@@ -29,41 +28,12 @@ func (app *app) cmdCreate(_ context.Context, args []string) error {
 	}
 
 	// validation done
-	app.logger.Infof("create: making apc p15 file from pem files")
 
-	// Read in PEM files
-	keyPem, err := os.ReadFile(*app.config.create.keyPemFilePath)
+	// make p15 file
+	apcFile, err := app.pemToAPCP15(*app.config.create.keyPemFilePath, *app.config.create.certPemFilePath, "create")
 	if err != nil {
-		return fmt.Errorf("create: failed to read key file (%s)", err)
+		return err
 	}
-
-	certPem, err := os.ReadFile(*app.config.create.certPemFilePath)
-	if err != nil {
-		return fmt.Errorf("create: failed to read cert file (%s)", err)
-	}
-
-	// make p15 struct
-	p15, err := pkcs15.ParsePEMToPKCS15(keyPem, certPem)
-	if err != nil {
-		return fmt.Errorf("create: failed to parse pem files (%s)", err)
-	}
-
-	app.logger.Infof("create: successfully loaded pem files")
-
-	// make file bytes
-	p15File, err := p15.ToP15File()
-	if err != nil {
-		return fmt.Errorf("create: failed to make p15 file (%s)", err)
-	}
-
-	// make header for file bytes
-	apcHeader, err := makeFileHeader(p15File)
-	if err != nil {
-		return fmt.Errorf("create: failed to make p15 file header (%s)", err)
-	}
-
-	// combine header with file
-	apcFile := append(apcHeader, p15File...)
 
 	// determine file name (should already be done by flag parsing, but avoid nil just in case)
 	fileName := createDefaultOutFilePath

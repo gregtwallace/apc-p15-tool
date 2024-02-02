@@ -9,7 +9,10 @@ require (
 	golang.org/x/crypto v0.18.0
 )
 
-require go.uber.org/multierr v1.11.0 // indirect
+require (
+	go.uber.org/multierr v1.11.0 // indirect
+	golang.org/x/sys v0.16.0 // indirect
+)
 
 replace apc-p15-tool/cmd => /cmd
 
