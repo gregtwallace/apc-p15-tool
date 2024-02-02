@@ -48,7 +48,7 @@ func (app *app) getConfig() {
 	createFlags := ff.NewFlagSet("create").SetParent(rootFlags)
 
 	cfg.create.keyPemFilePath = createFlags.StringLong("keyfile", "", "path and filename of the rsa-2048 key in pem format")
-	cfg.create.certPemFilePath = createFlags.StringLong("certfile", "", "path and filename of the rsa-2048 key in pem format")
+	cfg.create.certPemFilePath = createFlags.StringLong("certfile", "", "path and filename of the certificate in pem format")
 	cfg.create.outFilePath = createFlags.StringLong("outfile", createDefaultOutFilePath, "path and filename to write the p15 file to")
 
 	createCmd := &ff.Command{
