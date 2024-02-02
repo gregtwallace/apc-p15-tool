@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
 )
@@ -17,20 +16,15 @@ func (app *app) cmdCreate(_ context.Context, args []string) error {
 		return fmt.Errorf("create: failed, %w (%d)", ErrExtraArgs, len(args))
 	}
 
-	// key must be specified
-	if app.config.create.keyPemFilePath == nil || *app.config.create.keyPemFilePath == "" {
-		return errors.New("create: failed, key not specified")
-	}
-
-	// cert must be specified
-	if app.config.create.certPemFilePath == nil || *app.config.create.certPemFilePath == "" {
-		return errors.New("create: failed, cert not specified")
+	keyPem, certPem, err := app.config.create.keyCertPemCfg.GetPemBytes("create")
+	if err != nil {
+		return err
 	}
 
 	// validation done
 
 	// make p15 file
-	apcFile, err := app.pemToAPCP15(*app.config.create.keyPemFilePath, *app.config.create.certPemFilePath, "create")
+	apcFile, err := app.pemToAPCP15(keyPem, certPem, "create")
 	if err != nil {
 		return err
 	}

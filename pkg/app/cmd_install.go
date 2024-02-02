@@ -36,14 +36,9 @@ func (app *app) cmdInstall(cmdCtx context.Context, args []string) error {
 		return errors.New("install: failed, fingerprint not specified")
 	}
 
-	// key must be specified
-	if app.config.install.keyPemFilePath == nil || *app.config.install.keyPemFilePath == "" {
-		return errors.New("install: failed, key not specified")
-	}
-
-	// cert must be specified
-	if app.config.install.certPemFilePath == nil || *app.config.install.certPemFilePath == "" {
-		return errors.New("install: failed, cert not specified")
+	keyPem, certPem, err := app.config.install.keyCertPemCfg.GetPemBytes("install")
+	if err != nil {
+		return err
 	}
 
 	// host to install on must be specified
@@ -54,7 +49,7 @@ func (app *app) cmdInstall(cmdCtx context.Context, args []string) error {
 	// validation done
 
 	// make p15 file
-	apcFile, err := app.pemToAPCP15(*app.config.install.keyPemFilePath, *app.config.install.certPemFilePath, "install")
+	apcFile, err := app.pemToAPCP15(keyPem, certPem, "install")
 	if err != nil {
 		return err
 	}

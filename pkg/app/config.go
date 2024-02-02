@@ -2,6 +2,8 @@ package app
 
 import (
 	"errors"
+	"fmt"
+	"os"
 
 	"github.com/peterbourgon/ff/v4"
 )
@@ -10,21 +12,28 @@ var (
 	ErrExtraArgs = errors.New("extra args present")
 )
 
+// keyCertPemCfg contains values common to subcommands that need to use key
+// and cert pem
+type keyCertPemCfg struct {
+	keyPemFilePath  *string
+	certPemFilePath *string
+	keyPem          *string
+	certPem         *string
+}
+
 // app's config options from user
 type config struct {
 	logLevel *string
 	create   struct {
-		keyPemFilePath  *string
-		certPemFilePath *string
-		outFilePath     *string
+		keyCertPemCfg
+		outFilePath *string
 	}
 	install struct {
-		keyPemFilePath  *string
-		certPemFilePath *string
-		hostAndPort     *string
-		fingerprint     *string
-		username        *string
-		password        *string
+		keyCertPemCfg
+		hostAndPort *string
+		fingerprint *string
+		username    *string
+		password    *string
 	}
 }
 
@@ -57,6 +66,8 @@ func (app *app) getConfig(args []string) error {
 
 	cfg.create.keyPemFilePath = createFlags.StringLong("keyfile", "", "path and filename of the rsa-2048 key in pem format")
 	cfg.create.certPemFilePath = createFlags.StringLong("certfile", "", "path and filename of the certificate in pem format")
+	cfg.create.keyPem = createFlags.StringLong("keypem", "", "string of the rsa-2048 key in pem format")
+	cfg.create.certPem = createFlags.StringLong("certpem", "", "string of the certificate in pem format")
 	cfg.create.outFilePath = createFlags.StringLong("outfile", createDefaultOutFilePath, "path and filename to write the p15 file to")
 
 	createCmd := &ff.Command{
@@ -74,6 +85,8 @@ func (app *app) getConfig(args []string) error {
 
 	cfg.install.keyPemFilePath = installFlags.StringLong("keyfile", "", "path and filename of the rsa-2048 key in pem format")
 	cfg.install.certPemFilePath = installFlags.StringLong("certfile", "", "path and filename of the certificate in pem format")
+	cfg.install.keyPem = installFlags.StringLong("keypem", "", "string of the rsa-2048 key in pem format")
+	cfg.install.certPem = installFlags.StringLong("certpem", "", "string of the certificate in pem format")
 	cfg.install.hostAndPort = installFlags.StringLong("apchost", "", "hostname:port of the apc ups to install the certificate on")
 	cfg.install.fingerprint = installFlags.StringLong("fingerprint", "", "the SHA256 fingerprint value of the ups' ssh server")
 	cfg.install.username = installFlags.StringLong("username", "", "username to login to the apc ups")
@@ -98,4 +111,54 @@ func (app *app) getConfig(args []string) error {
 	}
 
 	return nil
+}
+
+// GetPemBytes returns the key and cert pem bytes as specified in keyCertPemCfg
+// or an error if it cant get the bytes of both
+func (kcCfg *keyCertPemCfg) GetPemBytes(subcommand string) (keyPem, certPem []byte, err error) {
+	// key pem (from arg or file)
+	if kcCfg.keyPem != nil && *kcCfg.keyPem != "" {
+		// error if filename is also set
+		if kcCfg.keyPemFilePath != nil && *kcCfg.keyPemFilePath != "" {
+			return nil, nil, fmt.Errorf("%s: failed, both key pem and key file specified", subcommand)
+		}
+
+		// use pem
+		keyPem = []byte(*kcCfg.keyPem)
+	} else {
+		// pem wasn't specified, try reading file
+		if kcCfg.keyPemFilePath == nil || *kcCfg.keyPemFilePath == "" {
+			return nil, nil, fmt.Errorf("%s: failed, neither key pem nor key file specified", subcommand)
+		}
+
+		// read file to get pem
+		keyPem, err = os.ReadFile(*kcCfg.keyPemFilePath)
+		if err != nil {
+			return nil, nil, fmt.Errorf("%s: failed to read key file (%w)", subcommand, err)
+		}
+	}
+
+	// cert pem (repeat same process)
+	if kcCfg.certPem != nil && *kcCfg.certPem != "" {
+		// error if filename is also set
+		if kcCfg.certPemFilePath != nil && *kcCfg.certPemFilePath != "" {
+			return nil, nil, fmt.Errorf("%s: failed, both cert pem and cert file specified", subcommand)
+		}
+
+		// use pem
+		certPem = []byte(*kcCfg.certPem)
+	} else {
+		// pem wasn't specified, try reading file
+		if kcCfg.certPemFilePath == nil || *kcCfg.certPemFilePath == "" {
+			return nil, nil, fmt.Errorf("%s: failed, neither cert pem nor cert file specified", subcommand)
+		}
+
+		// read file to get pem
+		certPem, err = os.ReadFile(*kcCfg.certPemFilePath)
+		if err != nil {
+			return nil, nil, fmt.Errorf("%s: failed to read cert file (%w)", subcommand, err)
+		}
+	}
+
+	return keyPem, certPem, nil
 }

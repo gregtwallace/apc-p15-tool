@@ -3,23 +3,11 @@ package app
 import (
 	"apc-p15-tool/pkg/pkcs15"
 	"fmt"
-	"os"
 )
 
 // pemToAPCP15 reads the specified pem files and returns the apc p15 bytes
-func (app *app) pemToAPCP15(keyFileName, certFileName, parentCmdName string) ([]byte, error) {
-	app.logger.Infof("%s: making apc p15 file from pem files", parentCmdName)
-
-	// Read in PEM files
-	keyPem, err := os.ReadFile(keyFileName)
-	if err != nil {
-		return nil, fmt.Errorf("%s: failed to read key file (%w)", parentCmdName, err)
-	}
-
-	certPem, err := os.ReadFile(certFileName)
-	if err != nil {
-		return nil, fmt.Errorf("%s: failed to read cert file (%w)", parentCmdName, err)
-	}
+func (app *app) pemToAPCP15(keyPem, certPem []byte, parentCmdName string) ([]byte, error) {
+	app.logger.Infof("%s: making apc p15 file from pem", parentCmdName)
 
 	// make p15 struct
 	p15, err := pkcs15.ParsePEMToPKCS15(keyPem, certPem)
