@@ -54,13 +54,10 @@ func Start() {
 			exitCode = 0
 			app.logger.Info("\n\n", ffhelp.Command(app.cmd))
 
-		} else if errors.Is(err, ErrExtraArgs) {
-			// extra args (will log elsewhere, so no need to log err again)
-			app.logger.Info("\n\n", ffhelp.Command(app.cmd))
-
 		} else if errors.Is(err, ff.ErrDuplicateFlag) ||
 			errors.Is(err, ff.ErrUnknownFlag) ||
-			errors.Is(err, ff.ErrNoExec) {
+			errors.Is(err, ff.ErrNoExec) ||
+			errors.Is(err, ErrExtraArgs) {
 			// other error that suggests user needs to see help
 			app.logger.Error(err)
 			app.logger.Info("\n\n", ffhelp.Command(app.cmd))

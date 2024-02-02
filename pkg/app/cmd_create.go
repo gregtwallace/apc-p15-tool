@@ -15,8 +15,7 @@ const createDefaultOutFilePath = "apctool.p15"
 func (app *app) cmdCreate(_ context.Context, args []string) error {
 	// extra args == error
 	if len(args) != 0 {
-		app.logger.Errorf("create: failed, extra args (%d) present", len(args))
-		return ErrExtraArgs
+		return fmt.Errorf("create: failed, %w (%d)", ErrExtraArgs, len(args))
 	}
 
 	// key must be specified
