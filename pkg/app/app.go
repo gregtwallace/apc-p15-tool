@@ -24,7 +24,7 @@ type app struct {
 }
 
 // actual application start
-func Start() {
+func Start(args []string) {
 	// make app w/ initial logger pre-config
 	initLogLevel := "debug"
 	app := &app{
@@ -34,8 +34,13 @@ func Start() {
 	// log start
 	app.logger.Infof("apc-p15-tool v%s", appVersion)
 
+	// get os.Args if args unspecified in func
+	if args == nil {
+		args = os.Args
+	}
+
 	// get & parse config
-	err := app.getConfig()
+	err := app.getConfig(args)
 
 	// re-init logger with configured log level
 	app.logger = makeZapLogger(app.config.logLevel)
@@ -65,9 +70,6 @@ func Start() {
 
 		os.Exit(exitCode)
 	}
-
-	// get config
-	app.getConfig()
 
 	// run it
 	exitCode := 0

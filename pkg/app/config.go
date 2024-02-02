@@ -2,7 +2,6 @@ package app
 
 import (
 	"errors"
-	"os"
 
 	"github.com/peterbourgon/ff/v4"
 )
@@ -31,7 +30,7 @@ type config struct {
 
 // getConfig returns the app's configuration from either command line args,
 // or environment variables
-func (app *app) getConfig() error {
+func (app *app) getConfig(args []string) error {
 	// make config
 	cfg := &config{}
 
@@ -93,7 +92,7 @@ func (app *app) getConfig() error {
 	// set cfg & parse
 	app.config = cfg
 	app.cmd = rootCmd
-	err := app.cmd.Parse(os.Args[1:], ff.WithEnvVarPrefix(environmentVarPrefix))
+	err := app.cmd.Parse(args[1:], ff.WithEnvVarPrefix(environmentVarPrefix))
 	if err != nil {
 		return err
 	}
