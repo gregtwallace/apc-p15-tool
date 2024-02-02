@@ -49,7 +49,7 @@ func scpSendFileToUPS(client *ssh.Client, p15File []byte) error {
 	// Go implementation sends additional 0x22 bytes when using Run() (as
 	// compared to putty's scp tool). these additional bytes seem to cause the
 	// apc ups to fail execution of the command
-	payload := []byte(fmt.Sprintf("scp -v -t %s", scpP15Destination))
+	payload := []byte(fmt.Sprintf("scp -q -t %s", scpP15Destination))
 	payloadLen := uint8(len(payload))
 	payload = append([]byte{0, 0, 0, payloadLen}, payload...)
 
