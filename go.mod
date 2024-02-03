@@ -10,7 +10,9 @@ require (
 
 require golang.org/x/sys v0.16.0 // indirect
 
-replace apc-p15-tool/cmd => /cmd
+replace apc-p15-tool/cmd/install_only => /cmd/install_only
+
+replace apc-p15-tool/cmd/tool => /cmd/tool
 
 replace apc-p15-tool/pkg/app => /pkg/app
 
