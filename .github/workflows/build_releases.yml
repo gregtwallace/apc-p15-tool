@@ -1,0 +1,298 @@
+name: Build Releases
+
+on:
+  workflow_dispatch:
+  push:
+    'tags':
+      - 'v*'
+
+env:
+  GITHUB_REF: ${{ github.ref }}
+  GO_VERSION: '1.21.6'
+
+jobs:
+  build-common:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Main Repo
+        uses: actions/checkout@v3
+        with:
+          repository: gregtwallace/apc-p15-tool
+          ref: ${{ env.GITHUB_REF }}
+          fetch-depth: 0
+
+      - name: Save README
+        uses: actions/upload-artifact@v3
+        with:
+          name: README.md
+          path: ./README.md
+
+      - name: Save LICENSE
+        uses: actions/upload-artifact@v3
+        with:
+          name: LICENSE.md
+          path: ./LICENSE.md
+
+      - name: Save CHANGELOG
+        uses: actions/upload-artifact@v3
+        with:
+          name: CHANGELOG.md
+          path: ./CHANGELOG.md
+
+  build-linux-arm64:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+        with:
+          repository: gregtwallace/apc-p15-tool
+          ref: ${{ env.GITHUB_REF }}
+          fetch-depth: 0
+
+      - name: Update apt
+        run: sudo apt update
+
+      - name: Install cross-compiler for linux/arm64
+        run: sudo apt-get -y install gcc-aarch64-linux-gnu
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '${{ env.GO_VERSION }}'
+
+      - name: Build Tool
+        run: go build -o ./apc-p15-tool -v ./cmd/tool
+        env:
+          GOOS: linux
+          GOARCH: arm64
+          CC: aarch64-linux-gnu-gcc
+
+      - name: Save Compiled Binary
+        uses: actions/upload-artifact@v3
+        with:
+          name: apc-p15-tool-linux-arm64
+          path: ./apc-p15-tool
+
+      - name: Build Install Only
+        run: go build -o ./apc-p15-install -v ./cmd/install_only
+        env:
+          GOOS: linux
+          GOARCH: arm64
+          CC: aarch64-linux-gnu-gcc
+
+      - name: Save Compiled Binary
+        uses: actions/upload-artifact@v3
+        with:
+          name: apc-p15-install-linux-arm64
+          path: ./apc-p15-install
+
+  build-linux-amd64:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Backend Repo
+        uses: actions/checkout@v3
+        with:
+          repository: gregtwallace/apc-p15-tool
+          ref: ${{ env.GITHUB_REF }}
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '${{ env.GO_VERSION }}'
+
+      - name: Build Tool
+        run: go build -o ./apc-p15-tool -v ./cmd/tool
+        env:
+          GOOS: linux
+          GOARCH: amd64
+
+      - name: Save Compiled Binary
+        uses: actions/upload-artifact@v3
+        with:
+          name: apc-p15-tool-linux-amd64
+          path: ./apc-p15-tool
+
+      - name: Build Install Only
+        run: go build -o ./apc-p15-install -v ./cmd/install_only
+        env:
+          GOOS: linux
+          GOARCH: amd64
+
+      - name: Save Compiled Binary
+        uses: actions/upload-artifact@v3
+        with:
+          name: apc-p15-install-linux-amd64
+          path: ./apc-p15-install
+
+  build-windows-amd64:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Backend Repo
+        uses: actions/checkout@v3
+        with:
+          repository: gregtwallace/apc-p15-tool
+          ref: ${{ env.GITHUB_REF }}
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '${{ env.GO_VERSION }}'
+
+      - name: Build Tool
+        run: go build -o ./apc-p15-tool.exe -v ./cmd/tool
+        env:
+          GOOS: windows
+          GOARCH: amd64
+
+      - name: Save Compiled Binary
+        uses: actions/upload-artifact@v3
+        with:
+          name: apc-p15-tool-windows-amd64
+          path: ./apc-p15-tool.exe
+
+      - name: Build Install Only
+        run: go build -o ./apc-p15-install.exe -v ./cmd/install_only
+        env:
+          GOOS: windows
+          GOARCH: amd64
+
+      - name: Save Compiled Binary
+        uses: actions/upload-artifact@v3
+        with:
+          name: apc-p15-install-windows-amd64
+          path: ./apc-p15-install.exe
+
+  release-file-linux-arm64:
+    needs: [build-common, build-linux-arm64]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Make release directory
+        run: mkdir ./release
+
+      - name: Download Tool Binary
+        uses: actions/download-artifact@v3
+        with:
+          name: apc-p15-tool-linux-arm64
+          path: ./release
+
+      - name: Download Install Binary
+        uses: actions/download-artifact@v3
+        with:
+          name: apc-p15-install-linux-arm64
+          path: ./release
+
+      - name: Download README
+        uses: actions/download-artifact@v3
+        with:
+          name: README.md
+          path: ./release
+
+      - name: Download LICENSE
+        uses: actions/download-artifact@v3
+        with:
+          name: LICENSE.md
+          path: ./release
+
+      - name: Download CHANGELOG
+        uses: actions/download-artifact@v3
+        with:
+          name: CHANGELOG.md
+          path: ./release
+
+      - name: Save Release
+        uses: actions/upload-artifact@v3
+        with:
+          name: apc-p15-tool_linux_arm64
+          path: ./release
+
+  release-file-linux-amd64:
+    needs: [build-common, build-linux-amd64]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Make release directory
+        run: mkdir ./release
+
+      - name: Download Tool Binary
+        uses: actions/download-artifact@v3
+        with:
+          name: apc-p15-tool-linux-amd64
+          path: ./release
+
+      - name: Download Install Binary
+        uses: actions/download-artifact@v3
+        with:
+          name: apc-p15-install-linux-amd64
+          path: ./release
+
+      - name: Download README
+        uses: actions/download-artifact@v3
+        with:
+          name: README.md
+          path: ./release
+
+      - name: Download LICENSE
+        uses: actions/download-artifact@v3
+        with:
+          name: LICENSE.md
+          path: ./release
+
+      - name: Download CHANGELOG
+        uses: actions/download-artifact@v3
+        with:
+          name: CHANGELOG.md
+          path: ./release
+
+      - name: Save Release
+        uses: actions/upload-artifact@v3
+        with:
+          name: apc-p15-tool_linux_amd64
+          path: ./release
+
+  release-file-windows-amd64:
+    needs: [build-common, build-windows-amd64]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Make release directory
+        run: mkdir ./release
+
+      - name: Download Tool Binary
+        uses: actions/download-artifact@v3
+        with:
+          name: apc-p15-tool-windows-amd64
+          path: ./release
+
+      - name: Download Install Binary
+        uses: actions/download-artifact@v3
+        with:
+          name: apc-p15-install-windows-amd64
+          path: ./release
+
+      - name: Download README
+        uses: actions/download-artifact@v3
+        with:
+          name: README.md
+          path: ./release
+
+      - name: Download LICENSE
+        uses: actions/download-artifact@v3
+        with:
+          name: LICENSE.md
+          path: ./release
+
+      - name: Download CHANGELOG
+        uses: actions/download-artifact@v3
+        with:
+          name: CHANGELOG.md
+          path: ./release
+
+      - name: Save Release
+        uses: actions/upload-artifact@v3
+        with:
+          name: apc-p15-tool_windows_amd64
+          path: ./release
