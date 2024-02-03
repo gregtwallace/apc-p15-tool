@@ -45,7 +45,9 @@ func Start(args []string) {
 	err := app.getConfig(args)
 
 	// if debug logging, make real debug logger
-	app.debugLogger = log.New(os.Stdout, "debug: ", 0)
+	if app.config.debugLogging != nil && *app.config.debugLogging {
+		app.debugLogger = log.New(os.Stdout, "debug: ", 0)
+	}
 
 	// deal with config err (after logger re-init)
 	if err != nil {
