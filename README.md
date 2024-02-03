@@ -55,3 +55,14 @@ certificates as they're issued by LeGo, without having to write a
 separate script.
 
 ![LeGo CertHub with APC P15 Tool](https://raw.githubusercontent.com/gregtwallace/apc-p15-tool/main/img/apc-p15-tool.png)
+
+## Thanks
+
+Special thanks to the following people and resources which helped me 
+deduce how all of this works:
+
+https://github.com/dnlmengs/pemtrans
+
+https://github.com/freddy36/apc_tools
+
+http://lapo.it/asn1js/
