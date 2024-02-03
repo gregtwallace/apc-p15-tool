@@ -67,8 +67,8 @@ func (app *app) cmdInstall(cmdCtx context.Context, args []string) error {
 		// log fingerprint for debugging
 		actualHashB64 := base64.RawStdEncoding.EncodeToString(actualHash)
 		actualHashHex := hex.EncodeToString(actualHash)
-		app.logger.Debugf("ssh: remote server key fingerprint (b64): %s", actualHashB64)
-		app.logger.Debugf("ssh: remote server key fingerprint (hex): %s", actualHashHex)
+		app.debugLogger.Printf("ssh: remote server key fingerprint (b64): %s", actualHashB64)
+		app.debugLogger.Printf("ssh: remote server key fingerprint (hex): %s", actualHashHex)
 
 		// allow base64 format
 		if actualHashB64 == *app.config.install.fingerprint {
@@ -120,7 +120,7 @@ func (app *app) cmdInstall(cmdCtx context.Context, args []string) error {
 	}
 
 	// done
-	app.logger.Infof("install: apc p15 file installed on %s", *app.config.install.hostAndPort)
+	app.stdLogger.Printf("install: apc p15 file installed on %s", *app.config.install.hostAndPort)
 
 	return nil
 }

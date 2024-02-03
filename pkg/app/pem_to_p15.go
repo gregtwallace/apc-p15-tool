@@ -7,7 +7,7 @@ import (
 
 // pemToAPCP15 reads the specified pem files and returns the apc p15 bytes
 func (app *app) pemToAPCP15(keyPem, certPem []byte, parentCmdName string) ([]byte, error) {
-	app.logger.Infof("%s: making apc p15 file from pem", parentCmdName)
+	app.stdLogger.Printf("%s: making apc p15 file from pem", parentCmdName)
 
 	// make p15 struct
 	p15, err := pkcs15.ParsePEMToPKCS15(keyPem, certPem)
@@ -15,7 +15,7 @@ func (app *app) pemToAPCP15(keyPem, certPem []byte, parentCmdName string) ([]byt
 		return nil, fmt.Errorf("%s: failed to parse pem files (%w)", parentCmdName, err)
 	}
 
-	app.logger.Infof("%s: successfully loaded pem files", parentCmdName)
+	app.stdLogger.Printf("%s: successfully loaded pem files", parentCmdName)
 
 	// make file bytes
 	p15File, err := p15.ToP15File()
@@ -32,7 +32,7 @@ func (app *app) pemToAPCP15(keyPem, certPem []byte, parentCmdName string) ([]byt
 	// combine header with file
 	apcFile := append(apcHeader, p15File...)
 
-	app.logger.Infof("%s: apc p15 file data succesfully generated", parentCmdName)
+	app.stdLogger.Printf("%s: apc p15 file data succesfully generated", parentCmdName)
 
 	return apcFile, nil
 }

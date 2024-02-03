@@ -41,7 +41,7 @@ func (app *app) cmdCreate(_ context.Context, args []string) error {
 		return fmt.Errorf("create: failed to write apc p15 file (%s)", err)
 	}
 
-	app.logger.Infof("create: apc p15 file %s written to disk", fileName)
+	app.stdLogger.Printf("create: apc p15 file %s written to disk", fileName)
 
 	return nil
 }

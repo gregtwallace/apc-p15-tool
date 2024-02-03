@@ -25,8 +25,8 @@ type keyCertPemCfg struct {
 
 // app's config options from user
 type config struct {
-	logLevel *string
-	create   struct {
+	debugLogging *bool
+	create       struct {
 		keyCertPemCfg
 		outFilePath *string
 	}
@@ -54,8 +54,7 @@ func (app *app) getConfig(args []string) error {
 	// apc-p15-tool -- root command
 	rootFlags := ff.NewFlagSet("apc-p15-tool")
 
-	cfg.logLevel = rootFlags.StringEnum('l', "loglevel", "log level: debug, info, warn, error, dpanic, panic, or fatal",
-		"info", "debug", "warn", "error", "dpanic", "panic", "fatal")
+	cfg.debugLogging = rootFlags.BoolLong("debug", "set this flag to enable additional debug logging messages")
 
 	rootCmd := &ff.Command{
 		Name:  "apc-p15-tool",
