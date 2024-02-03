@@ -12,8 +12,6 @@ import (
 
 const (
 	appVersion = "0.2.0"
-
-	environmentVarPrefix = "APC_P15_TOOL"
 )
 
 // struct for receivers to use common app pieces

@@ -10,6 +10,8 @@ import (
 
 var (
 	ErrExtraArgs = errors.New("extra args present")
+
+	environmentVarPrefix = "APC_P15_TOOL"
 )
 
 // keyCertPemCfg contains values common to subcommands that need to use key
