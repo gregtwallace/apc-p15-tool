@@ -83,6 +83,16 @@ func (app *app) cmdInstall(cmdCtx context.Context, args []string) error {
 		return errors.New("ssh: fingerprint didn't match")
 	}
 
+	// kex algos
+	// see defaults: https://cs.opensource.google/go/x/crypto/+/refs/tags/v0.18.0:ssh/common.go;l=62
+	kexAlgos := []string{
+		"curve25519-sha256", "curve25519-sha256@libssh.org",
+		"ecdh-sha2-nistp256", "ecdh-sha2-nistp384", "ecdh-sha2-nistp521",
+		"diffie-hellman-group14-sha256", "diffie-hellman-group14-sha1",
+	}
+	// extra for some apc ups
+	kexAlgos = append(kexAlgos, "diffie-hellman-group-exchange-sha256")
+
 	// install file on UPS
 	// ssh config
 	config := &ssh.ClientConfig{
@@ -92,11 +102,12 @@ func (app *app) cmdInstall(cmdCtx context.Context, args []string) error {
 		},
 		// APC seems to require `Client Version` string to start with "SSH-2" and must be at least
 		// 13 characters long
-		// e.g. working from Ubuntu ssh: ClientVersion: "SSH-2.0-OpenSSH_8.9p1 Ubuntu-3ubuntu0.6",
+		// working examples from other clients:
+		// ClientVersion: "SSH-2.0-OpenSSH_8.9p1 Ubuntu-3ubuntu0.6",
 		// ClientVersion: "SSH-2.0-PuTTY_Release_0.80",
 		ClientVersion: fmt.Sprintf("SSH-2.0-apc-p15-tool_v%s %s-%s", appVersion, runtime.GOOS, runtime.GOARCH),
-		Config:        ssh.Config{
-			// KeyExchanges: []string{"ecdh-sha2-nistp256"},
+		Config: ssh.Config{
+			KeyExchanges: kexAlgos,
 			// Ciphers:      []string{"aes128-ctr"},
 			// MACs:         []string{"hmac-sha2-256"},
 		},
