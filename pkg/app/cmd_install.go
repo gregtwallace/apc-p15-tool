@@ -93,6 +93,20 @@ func (app *app) cmdInstall(cmdCtx context.Context, args []string) error {
 	// extra for some apc ups
 	kexAlgos = append(kexAlgos, "diffie-hellman-group-exchange-sha256")
 
+	// ciphers
+	// see defaults: https://cs.opensource.google/go/x/crypto/+/master:ssh/common.go;l=37
+	ciphers := []string{
+		"aes128-gcm@openssh.com", "aes256-gcm@openssh.com",
+		"chacha20-poly1305@openssh.com",
+		"aes128-ctr", "aes192-ctr", "aes256-ctr",
+	}
+
+	// insecure cipher options?
+	if app.config.install.insecureCipher != nil && *app.config.install.insecureCipher {
+		app.stdLogger.Println("WARNING: insecure ciphers are enabled (--insecurecipher). SSH with an insecure cipher is NOT secure and should NOT be used.")
+		ciphers = append(ciphers, "aes128-cbc", "3des-cbc")
+	}
+
 	// install file on UPS
 	// ssh config
 	config := &ssh.ClientConfig{
@@ -108,7 +122,7 @@ func (app *app) cmdInstall(cmdCtx context.Context, args []string) error {
 		ClientVersion: fmt.Sprintf("SSH-2.0-apc-p15-tool_v%s %s-%s", appVersion, runtime.GOOS, runtime.GOARCH),
 		Config: ssh.Config{
 			KeyExchanges: kexAlgos,
-			// Ciphers:      []string{"aes128-ctr"},
+			Ciphers:      ciphers,
 			// MACs:         []string{"hmac-sha2-256"},
 		},
 		// HostKeyAlgorithms: []string{"ssh-rsa"},
