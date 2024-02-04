@@ -3,6 +3,43 @@ A tool to create APC p15 formatted certificates from pem files, without
 having to use APC's closed-source tool, APC generated keys, or other 
 proprietary tools (such as cryptlib).
 
+## Compatibility Notice
+
+This tool's create functionality is modeled from the APC NMCSecurityWizardCLI 
+aka `NMC Security Wizard CLI Utility`. The files it generates should be 
+comaptible with any UPS that accepts p15 files from that tool, though 
+currently my tool only supports RSA 2,048 bit keys. This was done since 
+1,024 is generally not considered secure any more and most (all?) public 
+ACME services won't accept keys of this size.
+
+The install functionality is a custom creation of mine so it may or may not 
+work depending on your exact setup. My setup (and therefore the testing 
+setup) is:
+- APC Smart-UPS 1500VA RM 2U SUA1500RM2U (Firmware Revision 667.18.D)
+- AP9631 NMC2 Hardware Revision 05 running AOS v7.0.4 and Boot Monitor 
+  v1.0.9.
+
+If you have problems you can post the log in an issue and I can try to fix it
+but it may be difficult without your particular hardware to test with.
+
+In particular, if you are experiencing `ssh: handshake failed:` please run 
+`ssh -vv myups.example.com` and include the `peer server KEXINIT proposal`
+in your issue. For example:
+
+```
+debug2: peer server KEXINIT proposal
+debug2: KEX algorithms: diffie-hellman-group-exchange-sha256,diffie-hellman-group-exchange-sha1,ecdh-sha2-nistp256
+debug2: host key algorithms: ssh-rsa
+debug2: ciphers ctos: aes256-ctr,aes128-ctr,aes256-cbc,aes128-cbc
+debug2: ciphers stoc: aes256-ctr,aes128-ctr,aes256-cbc,aes128-cbc
+debug2: MACs ctos: hmac-sha2-256,hmac-sha1
+debug2: MACs stoc: hmac-sha2-256,hmac-sha1
+debug2: compression ctos: none
+debug2: compression stoc: none
+debug2: languages ctos:
+debug2: languages stoc:
+```
+
 ## Usage
 
 Currently the tool contains two commands: create and install. The tool 
