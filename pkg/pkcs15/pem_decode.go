@@ -13,7 +13,7 @@ var (
 	errPemKeyBadBlock       = errors.New("pkcs15: pem key: failed to decode pem block")
 	errPemKeyFailedToParse  = errors.New("pkcs15: pem key: failed to parse key")
 	errPemKeyWrongBlockType = errors.New("pkcs15: pem key: unsupported pem block type (only pkcs1 and pkcs8 supported)")
-	errPemKeyWrongType      = errors.New("pkcs15: pem key: unsupported key type (only rsa 2,048 supported)")
+	errPemKeyWrongType      = errors.New("pkcs15: pem key: unsupported key type (only rsa 1,024 or 2,048 supported)")
 
 	errPemCertBadBlock      = errors.New("pkcs15: pem cert: failed to decode pem block")
 	errPemCertFailedToParse = errors.New("pkcs15: pem cert: failed to parse cert")
@@ -21,7 +21,7 @@ var (
 
 // pemKeyDecode attempts to decode a pem encoded byte slice and then attempts
 // to parse an RSA private key from the decoded pem block. an error is returned
-// if any of these steps fail OR if the rsa key is not of bitlen 2,048
+// if any of these steps fail OR if the key is not RSA and of bitlen 1,024 or 2,048
 func pemKeyDecode(keyPem []byte) (*rsa.PrivateKey, error) {
 	// decode
 	pemBlock, _ := pem.Decode([]byte(keyPem))
@@ -48,7 +48,7 @@ func pemKeyDecode(keyPem []byte) (*rsa.PrivateKey, error) {
 		}
 
 		// verify proper bitlen
-		if rsaKey.N.BitLen() != 2048 {
+		if rsaKey.N.BitLen() != 1024 && rsaKey.N.BitLen() != 2048 {
 			return nil, errPemKeyWrongType
 		}
 
@@ -71,7 +71,7 @@ func pemKeyDecode(keyPem []byte) (*rsa.PrivateKey, error) {
 			}
 
 			// verify proper bitlen
-			if rsaKey.N.BitLen() != 2048 {
+			if rsaKey.N.BitLen() != 1024 && rsaKey.N.BitLen() != 2048 {
 				return nil, errPemKeyWrongType
 			}
 

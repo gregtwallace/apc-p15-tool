@@ -7,10 +7,10 @@ proprietary tools (such as cryptlib).
 
 This tool's create functionality is modeled from the APC NMCSecurityWizardCLI 
 aka `NMC Security Wizard CLI Utility`. The files it generates should be 
-comaptible with any UPS that accepts p15 files from that tool, though 
-currently my tool only supports RSA 2,048 bit keys. This was done since 
-1,024 is generally not considered secure any more and most (all?) public 
-ACME services won't accept keys of this size.
+comaptible with any UPS that accepts p15 files from that tool. Only RSA 1,024
+and 2,048 bit keys are accepted. 1,024 bit RSA is no longer considered 
+completely secure; avoid keys of this size if possible. Most (all?) public 
+ACME services won't accept keys of this size anyway.
 
 The install functionality is a custom creation of mine so it may or may not 
 work depending on your exact setup. My setup (and therefore the testing 

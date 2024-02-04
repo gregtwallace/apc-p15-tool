@@ -8,8 +8,8 @@ import (
 )
 
 // makeFileHeader generates the 228 byte header to prepend to the .p15
-// as required by APC UPS NMC. Only 2,048 bit RSA keys are supported
-// so the header will always be written with that key size assumption
+// as required by APC UPS NMC. Contrary to the apc_tools repo, it does
+// mot appear the header changes based on key size.
 func makeFileHeader(p15File []byte) ([]byte, error) {
 	// original reference code from: https://github.com/bbczeuz/apc_tools
 	// // add APC header
