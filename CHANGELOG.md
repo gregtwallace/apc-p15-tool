@@ -1,5 +1,13 @@
 # APC P15 Tool Changelog
 
+## [v0.3.3] - 2024.02.04
+
+Add `--insecurecipher` flag to enable aes128-cbc and 3des-cbc for
+older devices/firmwares. These ciphers are considered insecure and
+should be avoided. A better alternative is to update the device 
+firmware if possible.
+
+
 ## [v0.3.2] - 2024.02.04
 
 Add support for 1,024 bit RSA keys. These are not recommended! RSA
