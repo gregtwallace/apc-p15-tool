@@ -16,6 +16,9 @@ import (
 // cmdInstall is the app's command to create apc p15 file content from key and cert
 // pem files and upload the p15 to the specified APC UPS
 func (app *app) cmdInstall(cmdCtx context.Context, args []string) error {
+	// done
+	defer app.stdLogger.Println("install: done")
+
 	// extra args == error
 	if len(args) != 0 {
 		return fmt.Errorf("install: failed, %w (%d)", ErrExtraArgs, len(args))
@@ -129,7 +132,7 @@ func (app *app) cmdInstall(cmdCtx context.Context, args []string) error {
 		HostKeyCallback: hk,
 
 		// reasonable timeout for file copy
-		Timeout: scpTimeout,
+		Timeout: sshScpTimeout,
 	}
 
 	// connect to ups over SSH
@@ -137,15 +140,37 @@ func (app *app) cmdInstall(cmdCtx context.Context, args []string) error {
 	if err != nil {
 		return fmt.Errorf("install: failed to connect to host (%w)", err)
 	}
+	defer client.Close()
 
 	// send file to UPS
-	err = scpSendFileToUPS(client, apcFile)
+	err = sshScpSendFileToUPS(client, apcFile)
 	if err != nil {
 		return fmt.Errorf("install: failed to send p15 file to ups over scp (%w)", err)
 	}
 
-	// done
+	// installed
 	app.stdLogger.Printf("install: apc p15 file installed on %s", *app.config.install.hostAndPort)
+
+	// restart UPS webUI
+	if app.config.install.restartWebUI != nil && *app.config.install.restartWebUI {
+		app.stdLogger.Println("install: sending restart command")
+
+		// connect to ups over SSH
+		// opening a second session doesn't seem to work with my NMC2 for some reason, so make
+		// a new connection instead
+		client, err = ssh.Dial("tcp", *app.config.install.hostAndPort, config)
+		if err != nil {
+			return fmt.Errorf("install: failed to reconnect to host to send webui restart command (%w)", err)
+		}
+		defer client.Close()
+
+		err = sshResetUPSWebUI(client)
+		if err != nil {
+			return fmt.Errorf("install: failed to send webui restart command (%w)", err)
+		}
+
+		app.stdLogger.Println("install: sent webui restart command")
+	}
 
 	return nil
 }

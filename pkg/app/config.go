@@ -36,6 +36,7 @@ type config struct {
 		fingerprint    *string
 		username       *string
 		password       *string
+		restartWebUI   *bool
 		insecureCipher *bool
 	}
 }
@@ -93,6 +94,7 @@ func (app *app) getConfig(args []string) error {
 	cfg.install.fingerprint = installFlags.StringLong("fingerprint", "", "the SHA256 fingerprint value of the ups' ssh server")
 	cfg.install.username = installFlags.StringLong("username", "", "username to login to the apc ups")
 	cfg.install.password = installFlags.StringLong("password", "", "password to login to the apc ups")
+	cfg.install.restartWebUI = installFlags.BoolLong("restartwebui", "some devices may need a webui restart to begin using the new cert, enabling this option sends the restart command after the p15 is installed")
 	cfg.install.insecureCipher = installFlags.BoolLong("insecurecipher", "allows the use of insecure ssh ciphers (NOT recommended)")
 
 	installCmd := &ff.Command{
