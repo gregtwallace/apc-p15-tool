@@ -1,5 +1,13 @@
 # APC P15 Tool Changelog
 
+## [v0.4.0] - 2024.02.05
+
+Add `--restartwebui` flag to issue a reboot command to the webui
+after a new certificate is installed. This was not needed with 
+my NMC2, but I suspect some might need it to get the new certificate
+to actually load.
+
+
 ## [v0.3.3] - 2024.02.04
 
 Add `--insecurecipher` flag to enable aes128-cbc and 3des-cbc for
