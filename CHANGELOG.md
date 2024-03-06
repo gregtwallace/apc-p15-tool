@@ -1,5 +1,10 @@
 # APC P15 Tool Changelog
 
+## [v0.4.1] - 2024.03.06
+
+Update to Go 1.22.1, which includes some security fixes.
+
+
 ## [v0.4.0] - 2024.02.05
 
 Add `--restartwebui` flag to issue a reboot command to the webui
