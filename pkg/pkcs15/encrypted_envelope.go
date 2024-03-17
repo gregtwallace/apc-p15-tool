@@ -120,9 +120,6 @@ func (p15 *pkcs15KeyCert) encryptedKeyEnvelope() ([]byte, error) {
 	encryptedContent := make([]byte, len(content))
 	contentEncrypter.CryptBlocks(encryptedContent, content)
 
-	// encrypted content MAC
-	macKey := pbkdf2.Key(cek, []byte("authentication"), 1, 32, sha1.New)
-
 	// data encryption alg block
 	encAlgObj := asn1obj.Sequence([][]byte{
 		// ContentEncryptionAlgorithmIdentifier
@@ -143,6 +140,9 @@ func (p15 *pkcs15KeyCert) encryptedKeyEnvelope() ([]byte, error) {
 			}),
 		}),
 	})
+
+	// encrypted content MAC
+	macKey := pbkdf2.Key(cek, []byte("authentication"), 1, 32, sha1.New)
 
 	macHasher := hmac.New(sha256.New, macKey)
 	// the data the MAC covers is the algId header bytes + encrypted data bytes
