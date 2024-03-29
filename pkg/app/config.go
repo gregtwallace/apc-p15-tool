@@ -99,7 +99,7 @@ func (app *app) getConfig(args []string) error {
 
 	installCmd := &ff.Command{
 		Name:      "install",
-		Usage:     "apc-p15-tool upload --keyfile key.pem --certfile cert.pem --apchost example.com:22 --fingerprint 123abc --username apc --password test",
+		Usage:     "apc-p15-tool install --keyfile key.pem --certfile cert.pem --apchost example.com:22 --fingerprint 123abc --username apc --password test",
 		ShortHelp: "install the specified key and cert pem files on an apc ups (they will be converted to a comaptible p15 file)",
 		Flags:     installFlags,
 		Exec:      app.cmdInstall,
