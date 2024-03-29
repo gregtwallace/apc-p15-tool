@@ -1,5 +1,10 @@
 # APC P15 Tool Changelog
 
+## [v0.4.2] - 2024-03-29
+
+Fix usage message. Thanks @k725.
+
+
 ## [v0.4.1] - 2024-03-06
 
 Update to Go 1.22.1, which includes some security fixes.
