@@ -86,12 +86,12 @@ for passing the pem content from another application without having
 to save the pem files to disk.
 
 Putting all of this together, you can combine the install binary with 
-a tool like LeGo CertHub (https://www.legocerthub.com/) to call the 
+a tool like Cert Warden (https://www.certwarden.com/) to call the 
 install binary, with environment variables, to directly upload new 
-certificates as they're issued by LeGo, without having to write a 
+certificates as they're issued by Cert Warden, without having to write a 
 separate script.
 
-![LeGo CertHub with APC P15 Tool](https://raw.githubusercontent.com/gregtwallace/apc-p15-tool/main/img/apc-p15-tool.png)
+![Cert Warden with APC P15 Tool](https://raw.githubusercontent.com/gregtwallace/apc-p15-tool/main/img/apc-p15-tool.png)
 
 ## Thanks
 
