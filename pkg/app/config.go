@@ -57,7 +57,7 @@ func (app *app) getConfig(args []string) error {
 	// apc-p15-tool -- root command
 	rootFlags := ff.NewFlagSet("apc-p15-tool")
 
-	cfg.debugLogging = rootFlags.BoolLong("debug", "set this flag to enable additional debug logging messages")
+	cfg.debugLogging = rootFlags.BoolLong("debug", "set this flag to enable additional debug logging messages and files")
 
 	rootCmd := &ff.Command{
 		Name:  "apc-p15-tool",

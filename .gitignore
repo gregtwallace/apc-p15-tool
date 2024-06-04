@@ -1,6 +1,7 @@
 # key/cert files
 *.p15
 *.pem
+*.b64
 
 # ignore test_data folder
 /_test_data

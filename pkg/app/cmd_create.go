@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"os"
 )
@@ -58,6 +59,32 @@ func (app *app) cmdCreate(_ context.Context, args []string) error {
 		return fmt.Errorf("create: failed to write apc p15 key file (%s)", err)
 	}
 	app.stdLogger.Printf("create: apc p15 key file %s written to disk", keyFileName)
+
+	// if debug, write additional debug files (b64 format to make copy/paste into asn1 decoder
+	// easy to do e.g., https://lapo.it/asn1js)
+	if app.config.debugLogging != nil && *app.config.debugLogging {
+		keyCertFileNameDebug := keyCertFileName + ".noheader.b64"
+		err = os.WriteFile(keyCertFileNameDebug, []byte(base64.StdEncoding.EncodeToString(apcKeyCertFile[apcHeaderLen:])), 0777)
+		if err != nil {
+			return fmt.Errorf("create: failed to write apc p15 key+cert file (%s)", err)
+		}
+		app.debugLogger.Printf("create: apc p15 key+cert file %s written to disk", keyCertFileNameDebug)
+
+		keyCertFileNameHeaderDebug := keyCertFileName + ".header.b64"
+		err = os.WriteFile(keyCertFileNameHeaderDebug, []byte(base64.StdEncoding.EncodeToString(apcKeyCertFile[apcHeaderLen:])), 0777)
+		if err != nil {
+			return fmt.Errorf("create: failed to write apc p15 key+cert file (%s)", err)
+		}
+		app.debugLogger.Printf("create: apc p15 key+cert file header %s written to disk", keyCertFileNameHeaderDebug)
+
+		keyFileNameDebug := keyFileName + ".b64"
+		err = os.WriteFile(keyFileNameDebug, []byte(base64.StdEncoding.EncodeToString(keyFile)), 0777)
+		if err != nil {
+			return fmt.Errorf("create: failed to write apc p15 key file (%s)", err)
+		}
+		app.debugLogger.Printf("create: apc p15 key file %s written to disk", keyFileNameDebug)
+
+	}
 
 	return nil
 }
