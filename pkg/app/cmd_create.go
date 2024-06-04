@@ -65,7 +65,7 @@ func (app *app) cmdCreate(_ context.Context, args []string) error {
 		app.debugLogger.Printf("create: apc p15 key+cert file %s written to disk", keyCertFileNameDebug)
 
 		keyCertFileNameHeaderDebug := keyCertFileName + ".header.b64"
-		err = os.WriteFile(keyCertFileNameHeaderDebug, []byte(base64.StdEncoding.EncodeToString(apcKeyCertFile[apcHeaderLen:])), 0600)
+		err = os.WriteFile(keyCertFileNameHeaderDebug, []byte(base64.StdEncoding.EncodeToString(apcKeyCertFile[:apcHeaderLen])), 0600)
 		if err != nil {
 			return fmt.Errorf("create: failed to write apc p15 key+cert file (%s)", err)
 		}
