@@ -29,6 +29,7 @@ type config struct {
 	create       struct {
 		keyCertPemCfg
 		outFilePath    *string
+		makeKeyP15     *bool
 		outKeyFilePath *string
 	}
 	install struct {
@@ -73,6 +74,7 @@ func (app *app) getConfig(args []string) error {
 	cfg.create.keyPem = createFlags.StringLong("keypem", "", "string of the rsa-1024 or rsa-2048 key in pem format")
 	cfg.create.certPem = createFlags.StringLong("certpem", "", "string of the certificate in pem format")
 	cfg.create.outFilePath = createFlags.StringLong("outfile", createDefaultOutFilePath, "path and filename to write the key+cert p15 file to")
+	cfg.create.makeKeyP15 = createFlags.BoolLong("keyp15", "create a second p15 file with just the private key")
 	cfg.create.outKeyFilePath = createFlags.StringLong("outkeyfile", createDefaultOutKeyFilePath, "path and filename to write the key p15 file to")
 
 	createCmd := &ff.Command{
