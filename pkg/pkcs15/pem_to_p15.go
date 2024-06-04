@@ -2,6 +2,7 @@ package pkcs15
 
 import (
 	"apc-p15-tool/pkg/tools/asn1obj"
+	"encoding/asn1"
 	"math/big"
 )
 
@@ -9,62 +10,11 @@ const (
 	apcKeyLabel = "Private key"
 )
 
-// ToP15File turns the key and cert into a properly formatted and encoded
-// p15 file
-func (p15 *pkcs15KeyCert) ToP15File() ([]byte, error) {
+// toP15KeyCert creates a P15 file with both the private key and certificate, mirroring the
+// final p15 file an APC UPS expects (though without the header)
+func (p15 *pkcs15KeyCert) toP15KeyCert(keyEnvelope []byte) (keyCert []byte, err error) {
 	// private key object
-	pkey, err := p15.toP15PrivateKey()
-	if err != nil {
-		return nil, err
-	}
-
-	cert, err := p15.toP15Cert()
-	if err != nil {
-		return nil, err
-	}
-
-	// ContentInfo
-	p15File := asn1obj.Sequence([][]byte{
-
-		// contentType: OID: 1.2.840.113549.1.15.3.1 pkcs15content (PKCS #15 content type)
-		asn1obj.ObjectIdentifier(asn1obj.OIDPkscs15Content),
-
-		// content
-		asn1obj.ExplicitCompound(0, [][]byte{
-			asn1obj.Sequence([][]byte{
-				asn1obj.Integer(big.NewInt(0)),
-				asn1obj.Sequence([][]byte{
-					asn1obj.ExplicitCompound(0, [][]byte{
-						asn1obj.ExplicitCompound(0, [][]byte{
-							pkey,
-						}),
-					}),
-					asn1obj.ExplicitCompound(4, [][]byte{
-						asn1obj.ExplicitCompound(0, [][]byte{
-							cert,
-						}),
-					}),
-				}),
-			}),
-		}),
-	})
-
-	return p15File, nil
-}
-
-// toP15PrivateKey creates the encoded private key. it is broken our from the larger p15
-// function for readability
-// NOTE: Do not use this to try and turn just a private key into a p15, the format isn't
-// quite the same.
-func (p15 *pkcs15KeyCert) toP15PrivateKey() ([]byte, error) {
-	// rsa encrypted key in encrypted envelope
-	envelope, err := p15.encryptedKeyEnvelope()
-	if err != nil {
-		return nil, err
-	}
-
-	// key object
-	key := asn1obj.Sequence([][]byte{
+	privateKey := asn1obj.Sequence([][]byte{
 		// commonObjectAttributes - Label
 		asn1obj.Sequence([][]byte{
 			asn1obj.UTF8String(apcKeyLabel),
@@ -87,20 +37,12 @@ func (p15 *pkcs15KeyCert) toP15PrivateKey() ([]byte, error) {
 			asn1obj.Sequence([][]byte{
 				// AuthEnvelopedData Type ([4])
 				asn1obj.ExplicitCompound(4, [][]byte{
-					envelope,
+					keyEnvelope,
 				}),
 			}),
 		}),
 	})
 
-	return key, nil
-}
-
-// toP15Cert creates the encoded certificate. it is broken our from the larger p15
-// function for readability
-// NOTE: Do not use this to try and turn just a cert into a p15. I don't believe,
-// such a thing is permissible under the spec.
-func (p15 *pkcs15KeyCert) toP15Cert() ([]byte, error) {
 	// cert object
 	cert := asn1obj.Sequence([][]byte{
 		// commonObjectAttributes - Label
@@ -134,5 +76,163 @@ func (p15 *pkcs15KeyCert) toP15Cert() ([]byte, error) {
 		}),
 	})
 
-	return cert, nil
+	// build the file
+
+	// ContentInfo
+	keyCert = asn1obj.Sequence([][]byte{
+
+		// contentType: OID: 1.2.840.113549.1.15.3.1 pkcs15content (PKCS #15 content type)
+		asn1obj.ObjectIdentifier(asn1obj.OIDPkscs15Content),
+
+		// content
+		asn1obj.ExplicitCompound(0, [][]byte{
+			asn1obj.Sequence([][]byte{
+				asn1obj.Integer(big.NewInt(0)),
+				asn1obj.Sequence([][]byte{
+					asn1obj.ExplicitCompound(0, [][]byte{
+						asn1obj.ExplicitCompound(0, [][]byte{
+							privateKey,
+						}),
+					}),
+					asn1obj.ExplicitCompound(4, [][]byte{
+						asn1obj.ExplicitCompound(0, [][]byte{
+							cert,
+						}),
+					}),
+				}),
+			}),
+		}),
+	})
+
+	return keyCert, nil
+}
+
+// toP15Key creates a P15 file with just the private key, mirroring the p15 format
+// the APC tool uses when generating a new private key (Note: no header is used on
+// this file)
+func (p15 *pkcs15KeyCert) toP15Key(keyEnvelope []byte) (key []byte, err error) {
+	// private key object (slightly different than the key+cert format)
+	privateKey := asn1obj.Sequence([][]byte{
+		// commonObjectAttributes - Label
+		asn1obj.Sequence([][]byte{
+			asn1obj.UTF8String(apcKeyLabel),
+		}),
+		// CommonKeyAttributes
+		asn1obj.Sequence([][]byte{
+			// CommonKeyAttributes - iD - uses keyId that is SHA1( SubjectPublicKeyInfo SEQUENCE )
+			asn1obj.OctetString(p15.keyId()),
+			// CommonKeyAttributes - usage (trailing 0s will drop)
+			asn1obj.BitString([]byte{byte(0b11100010)}),
+			// CommonKeyAttributes - accessFlags (trailing 0s will drop)
+			asn1obj.BitString([]byte{byte(0b10110000)}),
+		}),
+
+		//
+		asn1obj.ExplicitCompound(0, [][]byte{
+			asn1obj.Sequence([][]byte{
+				asn1obj.ExplicitCompound(0, [][]byte{
+					p15.keyIdInt2(),
+					p15.keyIdInt8(),
+					p15.keyIdInt9(),
+				}),
+			}),
+		}),
+
+		// ObjectValue - indirect-protected
+		asn1obj.ExplicitCompound(1, [][]byte{
+			asn1obj.Sequence([][]byte{
+				// AuthEnvelopedData Type ([4])
+				asn1obj.ExplicitCompound(4, [][]byte{
+					keyEnvelope,
+				}),
+			}),
+		}),
+	})
+
+	// ContentInfo
+	key = asn1obj.Sequence([][]byte{
+
+		// contentType: OID: 1.2.840.113549.1.15.3.1 pkcs15content (PKCS #15 content type)
+		asn1obj.ObjectIdentifier(asn1obj.OIDPkscs15Content),
+
+		// content
+		asn1obj.ExplicitCompound(0, [][]byte{
+			asn1obj.Sequence([][]byte{
+				asn1obj.Integer(big.NewInt(0)),
+				asn1obj.Sequence([][]byte{
+					// [0] Private Key
+					asn1obj.ExplicitCompound(0, [][]byte{
+						asn1obj.ExplicitCompound(0, [][]byte{
+							privateKey,
+						}),
+					}),
+					// [1] Public Key
+					asn1obj.ExplicitCompound(1, [][]byte{
+						asn1obj.ExplicitCompound(0, [][]byte{
+							asn1obj.Sequence([][]byte{
+								// commonObjectAttributes - Label
+								asn1obj.Sequence([][]byte{
+									asn1obj.UTF8String(apcKeyLabel),
+								}),
+								// CommonKeyAttributes
+								asn1obj.Sequence([][]byte{
+									asn1obj.OctetString(p15.keyId()),
+									asn1obj.BitString([]byte{byte(0b10000010)}),
+									asn1obj.BitString([]byte{byte(0b01000000)}),
+								}),
+
+								asn1obj.ExplicitCompound(1, [][]byte{
+									asn1obj.Sequence([][]byte{
+										asn1obj.ExplicitCompound(0, [][]byte{
+											asn1obj.ExplicitCompound(1, [][]byte{
+												asn1obj.Sequence([][]byte{
+													asn1obj.ObjectIdentifier(asn1obj.OIDrsaEncryptionPKCS1),
+													asn1.NullBytes,
+												}),
+												// RSAPublicKey SubjectPublicKeyInfo
+												asn1obj.BitString(
+													asn1obj.Sequence([][]byte{
+														asn1obj.Integer(p15.key.PublicKey.N),
+														asn1obj.Integer(big.NewInt(int64(p15.key.PublicKey.E))),
+													}),
+												),
+											}),
+										}),
+										// not 100% certain but appears to be rsa key byte len
+										asn1obj.Integer(big.NewInt(int64(p15.key.PublicKey.N.BitLen() / 8))),
+									}),
+								}),
+							}),
+						}),
+					}),
+				}),
+			}),
+		}),
+	})
+
+	return key, nil
+}
+
+// ToP15File turns the key and cert into a properly formatted and encoded
+// p15 file
+func (p15 *pkcs15KeyCert) ToP15Files() (keyCertFile []byte, keyFile []byte, err error) {
+	// rsa encrypted key in encrypted envelope (will be shared by both output files)
+	envelope, err := p15.encryptedKeyEnvelope()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// key + cert file
+	keyCertFile, err = p15.toP15KeyCert(envelope)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// key only file
+	keyFile, err = p15.toP15Key(envelope)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return keyCertFile, keyFile, nil
 }

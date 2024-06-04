@@ -7,6 +7,8 @@ import (
 	"github.com/sigurn/crc16"
 )
 
+const apcHeaderLen = 228
+
 // makeFileHeader generates the 228 byte header to prepend to the .p15
 // as required by APC UPS NMC. Contrary to the apc_tools repo, it does
 // mot appear the header changes based on key size.
@@ -28,7 +30,7 @@ func makeFileHeader(p15File []byte) ([]byte, error) {
 	// 		*(uint32_t *)(buf + 208) = keySize; // 1 for 1024 key, otherwise (2048 bit) 2
 	// Unsure why this was in original code but seems irrelevant
 
-	header := make([]byte, 228)
+	header := make([]byte, apcHeaderLen)
 
 	// always 1
 	header[0] = 1

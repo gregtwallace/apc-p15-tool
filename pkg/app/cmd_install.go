@@ -52,7 +52,7 @@ func (app *app) cmdInstall(cmdCtx context.Context, args []string) error {
 	// validation done
 
 	// make p15 file
-	apcFile, err := app.pemToAPCP15(keyPem, certPem, "install")
+	apcFile, _, err := app.pemToAPCP15s(keyPem, certPem, "install")
 	if err != nil {
 		return err
 	}

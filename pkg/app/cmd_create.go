@@ -6,7 +6,10 @@ import (
 	"os"
 )
 
-const createDefaultOutFilePath = "apctool.p15"
+const (
+	createDefaultOutFilePath    = "apctool.p15"
+	createDefaultOutKeyFilePath = "apctool.key.p15"
+)
 
 // cmdCreate is the app's command to create an apc p15 file from key and cert
 // pem files
@@ -26,25 +29,35 @@ func (app *app) cmdCreate(_ context.Context, args []string) error {
 
 	// validation done
 
-	// make p15 file
-	apcFile, err := app.pemToAPCP15(keyPem, certPem, "create")
+	// make p15 files
+	apcKeyCertFile, keyFile, err := app.pemToAPCP15s(keyPem, certPem, "create")
 	if err != nil {
 		return err
 	}
 
 	// determine file name (should already be done by flag parsing, but avoid nil just in case)
-	fileName := createDefaultOutFilePath
+	keyCertFileName := createDefaultOutFilePath
 	if app.config.create.outFilePath != nil && *app.config.create.outFilePath != "" {
-		fileName = *app.config.create.outFilePath
+		keyCertFileName = *app.config.create.outFilePath
 	}
 
-	// write file
-	err = os.WriteFile(fileName, apcFile, 0777)
+	keyFileName := createDefaultOutFilePath
+	if app.config.create.outKeyFilePath != nil && *app.config.create.outKeyFilePath != "" {
+		keyFileName = *app.config.create.outKeyFilePath
+	}
+
+	// write files
+	err = os.WriteFile(keyCertFileName, apcKeyCertFile, 0777)
 	if err != nil {
-		return fmt.Errorf("create: failed to write apc p15 file (%s)", err)
+		return fmt.Errorf("create: failed to write apc p15 key+cert file (%s)", err)
 	}
+	app.stdLogger.Printf("create: apc p15 key+cert file %s written to disk", keyCertFileName)
 
-	app.stdLogger.Printf("create: apc p15 file %s written to disk", fileName)
+	err = os.WriteFile(keyFileName, keyFile, 0777)
+	if err != nil {
+		return fmt.Errorf("create: failed to write apc p15 key file (%s)", err)
+	}
+	app.stdLogger.Printf("create: apc p15 key file %s written to disk", keyFileName)
 
 	return nil
 }

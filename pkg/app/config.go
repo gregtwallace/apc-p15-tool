@@ -28,7 +28,8 @@ type config struct {
 	debugLogging *bool
 	create       struct {
 		keyCertPemCfg
-		outFilePath *string
+		outFilePath    *string
+		outKeyFilePath *string
 	}
 	install struct {
 		keyCertPemCfg
@@ -71,7 +72,8 @@ func (app *app) getConfig(args []string) error {
 	cfg.create.certPemFilePath = createFlags.StringLong("certfile", "", "path and filename of the certificate in pem format")
 	cfg.create.keyPem = createFlags.StringLong("keypem", "", "string of the rsa-1024 or rsa-2048 key in pem format")
 	cfg.create.certPem = createFlags.StringLong("certpem", "", "string of the certificate in pem format")
-	cfg.create.outFilePath = createFlags.StringLong("outfile", createDefaultOutFilePath, "path and filename to write the p15 file to")
+	cfg.create.outFilePath = createFlags.StringLong("outfile", createDefaultOutFilePath, "path and filename to write the key+cert p15 file to")
+	cfg.create.outKeyFilePath = createFlags.StringLong("outkeyfile", createDefaultOutKeyFilePath, "path and filename to write the key p15 file to")
 
 	createCmd := &ff.Command{
 		Name:      "create",
