@@ -12,7 +12,7 @@ func sshCheckResponse(remoteOutPipe io.Reader) error {
 	buffer := make([]uint8, 1)
 	_, err := remoteOutPipe.Read(buffer)
 	if err != nil {
-		return fmt.Errorf("ssh: failed to make read output buffer (%w)", err)
+		return fmt.Errorf("ssh: failed to read output buffer (%w)", err)
 	}
 
 	responseType := buffer[0]
