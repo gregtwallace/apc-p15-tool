@@ -15,9 +15,6 @@ const (
 // cmdCreate is the app's command to create an apc p15 file from key and cert
 // pem files
 func (app *app) cmdCreate(_ context.Context, args []string) error {
-	// done
-	defer app.stdLogger.Println("create: done")
-
 	// extra args == error
 	if len(args) != 0 {
 		return fmt.Errorf("create: failed, %w (%d)", ErrExtraArgs, len(args))

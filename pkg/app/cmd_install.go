@@ -10,9 +10,6 @@ import (
 // cmdInstall is the app's command to create apc p15 file content from key and cert
 // pem files and upload the p15 to the specified APC UPS
 func (app *app) cmdInstall(cmdCtx context.Context, args []string) error {
-	// done
-	defer app.stdLogger.Println("install: done")
-
 	// extra args == error
 	if len(args) != 0 {
 		return fmt.Errorf("install: failed, %w (%d)", ErrExtraArgs, len(args))
