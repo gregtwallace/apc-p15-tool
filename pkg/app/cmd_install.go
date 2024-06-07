@@ -46,7 +46,7 @@ func (app *app) cmdInstall(cmdCtx context.Context, args []string) error {
 	// validation done
 
 	// make p15 file
-	keyCertP15, _, err := app.pemToAPCP15s(keyPem, certPem, "install")
+	keyP15, keyCertP15, err := app.pemToAPCP15(keyPem, certPem, "install")
 	if err != nil {
 		return err
 	}
@@ -66,7 +66,7 @@ func (app *app) cmdInstall(cmdCtx context.Context, args []string) error {
 	}
 
 	// install SSL Cert
-	err = client.InstallSSLCert(keyCertP15)
+	err = client.InstallSSLCert(keyP15, certPem, keyCertP15)
 	if err != nil {
 		return fmt.Errorf("install: failed to send file to ups over scp (%w)", err)
 	}

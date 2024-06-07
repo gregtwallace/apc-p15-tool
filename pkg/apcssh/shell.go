@@ -79,7 +79,10 @@ func (cli *Client) cmd(command string) (*upsCmdResponse, error) {
 			codeTxtIndx := strings.Index(result, "\n")
 			res.codeText = result[:codeTxtIndx-1]
 
-			res.resultText = result[codeTxtIndx+1 : len(result)-2]
+			// avoid out of bounds if no result text
+			if codeTxtIndx+1 <= len(result)-2 {
+				res.resultText = result[codeTxtIndx+1 : len(result)-2]
+			}
 			break
 		}
 	}

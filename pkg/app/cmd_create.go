@@ -31,7 +31,7 @@ func (app *app) cmdCreate(_ context.Context, args []string) error {
 	// validation done
 
 	// make p15 files
-	apcKeyCertFile, keyFile, err := app.pemToAPCP15s(keyPem, certPem, "create")
+	keyFile, apcKeyCertFile, err := app.pemToAPCP15(keyPem, certPem, "create")
 	if err != nil {
 		return err
 	}

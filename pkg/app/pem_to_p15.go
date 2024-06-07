@@ -5,10 +5,10 @@ import (
 	"fmt"
 )
 
-// pemToAPCP15s reads the specified pem files and returns the apc p15 files (both a
+// pemToAPCP15 reads the specified pem files and returns the apc p15 files (both a
 // p15 file with just the private key, and also a p15 file with both the private key
 // and certificate). The key+cert file includes the required APC header, prepended.
-func (app *app) pemToAPCP15s(keyPem, certPem []byte, parentCmdName string) (apcKeyCertFile, keyFile []byte, err error) {
+func (app *app) pemToAPCP15(keyPem, certPem []byte, parentCmdName string) (keyFile []byte, apcKeyCertFile []byte, err error) {
 	app.stdLogger.Printf("%s: making apc p15 file from pem", parentCmdName)
 
 	// make p15 struct
@@ -36,5 +36,5 @@ func (app *app) pemToAPCP15s(keyPem, certPem []byte, parentCmdName string) (apcK
 
 	app.stdLogger.Printf("%s: apc p15 file data succesfully generated", parentCmdName)
 
-	return apcKeyCertFile, keyFile, nil
+	return keyFile, apcKeyCertFile, nil
 }
