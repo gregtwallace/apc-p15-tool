@@ -4,9 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
-	"errors"
 	"fmt"
-	"log"
 	"net"
 	"runtime"
 	"strings"
@@ -57,10 +55,7 @@ func New(cfg *Config) (*Client, error) {
 
 		// check for fingerprint match (b64 or hex)
 		if actualHashB64 != cfg.ServerFingerprint && actualHashHex != cfg.ServerFingerprint {
-			log.Printf("apcssh: remote server key fingerprint (b64): %s", actualHashB64)
-			log.Printf("apcssh: remote server key fingerprint (hex): %s", actualHashHex)
-
-			return errors.New("apcssh: fingerprint didn't match")
+			return fmt.Errorf("apcssh: server returned wrong fingerprint (b64: %s ; hex: %s)", actualHashB64, actualHashHex)
 		}
 
 		return nil
@@ -86,7 +81,6 @@ func New(cfg *Config) (*Client, error) {
 
 	// insecure cipher options?
 	if cfg.InsecureCipher {
-		log.Println("WARNING: insecure ciphers are enabled (--insecurecipher). SSH with an insecure cipher is NOT secure and should NOT be used.")
 		ciphers = append(ciphers, "aes128-cbc", "3des-cbc")
 	}
 

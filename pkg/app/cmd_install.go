@@ -51,6 +51,11 @@ func (app *app) cmdInstall(cmdCtx context.Context, args []string) error {
 		return err
 	}
 
+	// log warning if insecure cipher
+	if app.config.install.insecureCipher != nil && *app.config.install.insecureCipher {
+		app.stdLogger.Println("WARNING: install: insecure ciphers are enabled (--insecurecipher). SSH with an insecure cipher is NOT secure and should NOT be used.")
+	}
+
 	// make APC SSH client
 	cfg := &apcssh.Config{
 		Hostname:          *app.config.install.hostAndPort,
