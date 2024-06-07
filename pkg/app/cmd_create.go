@@ -48,6 +48,12 @@ func (app *app) cmdCreate(_ context.Context, args []string) error {
 	}
 
 	// write file(s)
+	err = os.WriteFile(keyFileName, keyFile, 0600)
+	if err != nil {
+		return fmt.Errorf("create: failed to write apc p15 key file (%s)", err)
+	}
+	app.stdLogger.Printf("create: apc p15 key file %s written to disk", keyFileName)
+
 	err = os.WriteFile(keyCertFileName, apcKeyCertFile, 0600)
 	if err != nil {
 		return fmt.Errorf("create: failed to write apc p15 key+cert file (%s)", err)
@@ -57,6 +63,13 @@ func (app *app) cmdCreate(_ context.Context, args []string) error {
 	// if debug, write additional debug files (b64 format to make copy/paste into asn1 decoder
 	// easy to do e.g., https://lapo.it/asn1js)
 	if app.config.debugLogging != nil && *app.config.debugLogging {
+		keyFileNameDebug := keyFileName + ".b64"
+		err = os.WriteFile(keyFileNameDebug, []byte(base64.StdEncoding.EncodeToString(keyFile)), 0600)
+		if err != nil {
+			return fmt.Errorf("create: failed to write apc p15 key file (%s)", err)
+		}
+		app.debugLogger.Printf("create: apc p15 key file %s written to disk", keyFileNameDebug)
+
 		keyCertFileNameDebug := keyCertFileName + ".noheader.b64"
 		err = os.WriteFile(keyCertFileNameDebug, []byte(base64.StdEncoding.EncodeToString(apcKeyCertFile[apcHeaderLen:])), 0600)
 		if err != nil {
@@ -71,25 +84,6 @@ func (app *app) cmdCreate(_ context.Context, args []string) error {
 		}
 		app.debugLogger.Printf("create: apc p15 key+cert file header %s written to disk", keyCertFileNameHeaderDebug)
 
-	}
-
-	// make key p15 ?
-	if app.config.create.makeKeyP15 != nil && *app.config.create.makeKeyP15 {
-		err = os.WriteFile(keyFileName, keyFile, 0600)
-		if err != nil {
-			return fmt.Errorf("create: failed to write apc p15 key file (%s)", err)
-		}
-		app.stdLogger.Printf("create: apc p15 key file %s written to disk", keyFileName)
-
-		// debug file ?
-		if app.config.debugLogging != nil && *app.config.debugLogging {
-			keyFileNameDebug := keyFileName + ".b64"
-			err = os.WriteFile(keyFileNameDebug, []byte(base64.StdEncoding.EncodeToString(keyFile)), 0600)
-			if err != nil {
-				return fmt.Errorf("create: failed to write apc p15 key file (%s)", err)
-			}
-			app.debugLogger.Printf("create: apc p15 key file %s written to disk", keyFileNameDebug)
-		}
 	}
 
 	return nil
