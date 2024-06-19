@@ -66,6 +66,7 @@ func (app *app) cmdInstall(cmdCtx context.Context, args []string) error {
 	if err != nil {
 		return fmt.Errorf("install: failed to connect to host (%w)", err)
 	}
+	app.stdLogger.Println("install: connected to ups ssh, installing ssl key and cert...")
 
 	// install SSL Cert
 	err = client.InstallSSLCert(keyP15, certPem, keyCertP15)
