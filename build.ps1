@@ -11,7 +11,7 @@ go build -o $outDir/apc-p15-tool-amd64.exe ./cmd/tool
 $env:GOARCH = "amd64"
 $env:GOOS = "windows"
 $env:CGO_ENABLED = 0
-go build -o $outDir/apc-p15-install-amd64.exe ./cmd/tool
+go build -o $outDir/apc-p15-install-amd64.exe ./cmd/install_only
 
 # Linux x64
 $env:GOARCH = "amd64"
