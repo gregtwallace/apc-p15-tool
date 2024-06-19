@@ -19,7 +19,7 @@ func (cli *Client) UploadSCP(destination string, fileContent []byte, filePermiss
 	// connect
 	sshClient, err := ssh.Dial("tcp", cli.hostname, cli.sshCfg)
 	if err != nil {
-		return fmt.Errorf("apcssh: scp: failed to dial session (%w)", err)
+		return fmt.Errorf("apcssh: scp: failed to dial client (%w)", err)
 	}
 	defer sshClient.Close()
 

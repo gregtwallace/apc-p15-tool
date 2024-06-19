@@ -71,7 +71,7 @@ func (app *app) cmdInstall(cmdCtx context.Context, args []string) error {
 	// install SSL Cert
 	err = client.InstallSSLCert(keyP15, certPem, keyCertP15)
 	if err != nil {
-		return fmt.Errorf("install: failed to send file to ups over scp (%w)", err)
+		return fmt.Errorf("install: %w", err)
 	}
 
 	// installed

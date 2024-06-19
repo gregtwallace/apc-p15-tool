@@ -13,10 +13,8 @@ import (
 func (cli *Client) RestartWebUI() error {
 	result, err := cli.cmd("reboot -Y")
 	if err != nil {
-		return err
-	}
-
-	if !strings.EqualFold(result.code, "e000") {
+		return fmt.Errorf("apcssh: failed to restart web ui (%w)", err)
+	} else if !strings.EqualFold(result.code, "e000") {
 		return fmt.Errorf("apcssh: failed to restart web ui (%s: %s)", result.code, result.codeText)
 	}
 
