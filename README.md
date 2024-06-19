@@ -22,9 +22,12 @@ setup) is:
 If you have problems you can post the log in an issue and I can try to fix it
 but it may be difficult without your particular hardware to test with.
 
-In particular, if you are experiencing `ssh: handshake failed:` please run 
-`ssh -vv myups.example.com` and include the `peer server KEXINIT proposal`
-in your issue. For example:
+In particular, if you are experiencing `ssh: handshake failed:` first try
+using the `--insecurecipher` flag. If this works, you should upgrade your
+NMC to a newer firmware which includes secure ciphers. You should NOT automate
+your environment using this flag as SSH over these ciphers is broken and
+exploitable. If this also does not work, please run `ssh -vv myups.example.com`
+and include the `peer server KEXINIT proposal` in your issue. For example:
 
 ```
 debug2: peer server KEXINIT proposal
