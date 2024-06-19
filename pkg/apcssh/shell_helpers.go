@@ -11,8 +11,8 @@ func scanAPCShell(data []byte, atEOF bool) (advance int, token []byte, err error
 		return 0, nil, nil
 	}
 
-	// regex for shell prompt (e.g., `apc@apc>`)
-	re := regexp.MustCompile(`(\r\n|\r|\n)[A-Za-z0-0.]+@[A-Za-z0-0.]+>`)
+	// regex for shell prompt (e.g., `apc@apc>`, `apc>`, `some@dev>`, `other123>`, etc.)
+	re := regexp.MustCompile(`(\r\n|\r|\n)([A-Za-z0-9.]+@?)?[A-Za-z0-9.]+>`)
 
 	// find match for prompt
 	if index := re.FindStringIndex(string(data)); index != nil {
