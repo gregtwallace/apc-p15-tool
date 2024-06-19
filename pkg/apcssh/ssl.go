@@ -15,7 +15,7 @@ func (cli *Client) InstallSSLCert(keyP15 []byte, certPem []byte, keyCertP15 []by
 		return fmt.Errorf("apcssh: ssl cert install: failed to send ssl cmd (%w)", err)
 	}
 	// E101 is the code for "Command Not Found"
-	supportsSSLCmd := strings.ToLower(result.code) != "e101"
+	supportsSSLCmd := !strings.EqualFold(result.code, "e101")
 
 	// if SSL is supported, use that method
 	if supportsSSLCmd {
@@ -46,7 +46,7 @@ func (cli *Client) installSSLCertModern(keyP15 []byte, certPem []byte) error {
 	if err != nil {
 		return fmt.Errorf("apcssh: ssl cert install: failed to send ssl key install cmd (%w)", err)
 	}
-	if strings.ToLower(result.code) != "e000" {
+	if !strings.EqualFold(result.code, "e000") {
 		return fmt.Errorf("apcssh: ssl cert install: ssl key install cmd returned error code (%s: %s)", result.code, result.codeText)
 	}
 
@@ -54,7 +54,7 @@ func (cli *Client) installSSLCertModern(keyP15 []byte, certPem []byte) error {
 	if err != nil {
 		return fmt.Errorf("apcssh: ssl cert install: failed to send ssl cert install cmd (%w)", err)
 	}
-	if strings.ToLower(result.code) != "e000" {
+	if !strings.EqualFold(result.code, "e000") {
 		return fmt.Errorf("apcssh: ssl cert install: ssl cert install cmd returned error code (%s: %s)", result.code, result.codeText)
 	}
 

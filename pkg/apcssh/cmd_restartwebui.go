@@ -16,7 +16,7 @@ func (cli *Client) RestartWebUI() error {
 		return err
 	}
 
-	if strings.ToLower(result.code) != "e000" {
+	if !strings.EqualFold(result.code, "e000") {
 		return fmt.Errorf("apcssh: failed to restart web ui (%s: %s)", result.code, result.codeText)
 	}
 
