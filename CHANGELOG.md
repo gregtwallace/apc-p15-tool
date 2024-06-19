@@ -1,5 +1,11 @@
 # APC P15 Tool Changelog
 
+## [v0.5.2] - 2024-06-19
+
+Minor tweak to the previous version. Add timeout for shell
+commands that don't execute as expected.
+
+
 ## [v0.5.1] - 2024-06-18
 
 Both NMC2 and NMC3 should now be fully supported.
