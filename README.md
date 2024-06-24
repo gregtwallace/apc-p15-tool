@@ -58,14 +58,15 @@ and licensed under the GPL-3.0 license.
 Both NMC2 and NMC3 devices should be fully supported. However, I have one
 NMC2 device in a home lab and have no way to guarantee success in all cases.
 
-Only RSA 1,024 and 2,048 bit keys are accepted. 1,024 bit RSA is no longer 
-considered completely secure; avoid keys of this size if possible. Most 
+Only RSA 1,024, 2,048, and 3,072 bit keys are accepted. 1,024 bit RSA is no
+longer considered completely secure; avoid keys of this size if possible. Most 
 (all?) public ACME services won't accept keys of this size anyway.
 
-Even though later versions of the NMC3 firmware supports RSA 4,096 and 
-ECDSA keys, this tool does not. These options were not available in APC's
-proprietary tool, and as such I have no way to generate files to reverse 
-engineer.
+NMC2 does not officially support the 3,072 bit key size, however, it works fine
+on my NMC2. If you use this size and it doesn't work on your NMC2, try a 2,048
+bit key instead. Later versions of the NMC3 firmware support RSA 4,096 and 
+ECDSA keys, but this tool does not. ECDSA was not included in APC's proprietary
+tool, and as such I have no way to generate files to reverse engineer.
 
 My setup (and therefore the testing setup) is:
 - APC Smart-UPS 1500VA RM 2U SUA1500RM2U (Firmware Revision 667.18.D)
