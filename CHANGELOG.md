@@ -1,5 +1,10 @@
 # APC P15 Tool Changelog
 
+## [v0.5.3] - 2024-06-24
+
+Add 3,072 bit RSA key support.
+
+
 ## [v0.5.2] - 2024-06-19
 
 Minor tweak to the previous version. Add timeout for shell
