@@ -1,12 +1,14 @@
 package pkcs15
 
 import (
+	"crypto"
 	"crypto/rsa"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"reflect"
 )
 
 var (
@@ -22,7 +24,7 @@ var (
 // pemKeyDecode attempts to decode a pem encoded byte slice and then attempts
 // to parse an RSA private key from the decoded pem block. an error is returned
 // if any of these steps fail OR if the key is not RSA and of bitlen 1,024 or 2,048
-func pemKeyDecode(keyPem []byte) (*rsa.PrivateKey, error) {
+func pemKeyDecode(keyPem []byte) (crypto.PrivateKey, error) {
 	// decode
 	pemBlock, _ := pem.Decode([]byte(keyPem))
 	if pemBlock == nil {
@@ -30,13 +32,11 @@ func pemKeyDecode(keyPem []byte) (*rsa.PrivateKey, error) {
 	}
 
 	// parsing depends on block type
-	var rsaKey *rsa.PrivateKey
+	var privateKey crypto.PrivateKey
 
 	switch pemBlock.Type {
 	case "RSA PRIVATE KEY": // PKCS1
-		var err error
-
-		rsaKey, err = x509.ParsePKCS1PrivateKey(pemBlock.Bytes)
+		rsaKey, err := x509.ParsePKCS1PrivateKey(pemBlock.Bytes)
 		if err != nil {
 			return nil, errPemKeyFailedToParse
 		}
@@ -53,6 +53,22 @@ func pemKeyDecode(keyPem []byte) (*rsa.PrivateKey, error) {
 		}
 
 		// good to go
+		privateKey = rsaKey
+
+	// case "EC PRIVATE KEY": // SEC1, ASN.1
+	// 	var ecdKey *ecdsa.PrivateKey
+	// 	ecdKey, err := x509.ParseECPrivateKey(pemBlock.Bytes)
+	// 	if err != nil {
+	// 		return nil, errPemKeyFailedToParse
+	// 	}
+
+	// 	// verify acceptable curve name
+	// 	if ecdKey.Curve.Params().Name != "P-256" && ecdKey.Curve.Params().Name != "P-384" {
+	// 		return nil, errPemKeyWrongType
+	// 	}
+
+	// 	// good to go
+	// 	privateKey = ecdKey
 
 	case "PRIVATE KEY": // PKCS8
 		pkcs8Key, err := x509.ParsePKCS8PrivateKey(pemBlock.Bytes)
@@ -62,20 +78,28 @@ func pemKeyDecode(keyPem []byte) (*rsa.PrivateKey, error) {
 
 		switch pkcs8Key := pkcs8Key.(type) {
 		case *rsa.PrivateKey:
-			rsaKey = pkcs8Key
-
 			// basic sanity check
-			err = rsaKey.Validate()
+			err = pkcs8Key.Validate()
 			if err != nil {
 				return nil, fmt.Errorf("pkcs15: pem key: failed sanity check (%s)", err)
 			}
 
 			// verify proper bitlen
-			if rsaKey.N.BitLen() != 1024 && rsaKey.N.BitLen() != 2048 && rsaKey.N.BitLen() != 3072 {
+			if pkcs8Key.N.BitLen() != 1024 && pkcs8Key.N.BitLen() != 2048 && pkcs8Key.N.BitLen() != 3072 {
 				return nil, errPemKeyWrongType
 			}
 
 			// good to go
+			privateKey = pkcs8Key
+
+		// case *ecdsa.PrivateKey:
+		// 	// verify acceptable curve name
+		// 	if pkcs8Key.Curve.Params().Name != "P-256" && pkcs8Key.Curve.Params().Name != "P-384" {
+		// 		return nil, errPemKeyWrongType
+		// 	}
+
+		// 	// good to go
+		// 	privateKey = pkcs8Key
 
 		default:
 			return nil, errPemKeyWrongType
@@ -86,12 +110,12 @@ func pemKeyDecode(keyPem []byte) (*rsa.PrivateKey, error) {
 	}
 
 	// if rsaKey is nil somehow, error
-	if rsaKey == nil {
+	if reflect.ValueOf(privateKey).IsNil() {
 		return nil, errors.New("pkcs15: pem key: rsa key unexpectedly nil (report bug to project repo)")
 	}
 
 	// success!
-	return rsaKey, nil
+	return privateKey, nil
 }
 
 // pemCertDecode attempts to decode a pem encoded byte slice and then attempts

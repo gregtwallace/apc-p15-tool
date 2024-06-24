@@ -2,6 +2,7 @@ package pkcs15
 
 import (
 	"apc-p15-tool/pkg/tools/asn1obj"
+	"crypto/rsa"
 	"encoding/asn1"
 	"math/big"
 )
@@ -111,6 +112,38 @@ func (p15 *pkcs15KeyCert) toP15KeyCert(keyEnvelope []byte) (keyCert []byte, err 
 // the APC tool uses when generating a new private key (Note: no header is used on
 // this file)
 func (p15 *pkcs15KeyCert) toP15Key(keyEnvelope []byte) (key []byte, err error) {
+	// create public key object
+	var pubKeyObj []byte
+
+	switch privKey := p15.key.(type) {
+	case *rsa.PrivateKey:
+		pubKeyObj = asn1obj.ExplicitCompound(1, [][]byte{
+			asn1obj.Sequence([][]byte{
+				asn1obj.ExplicitCompound(0, [][]byte{
+					asn1obj.ExplicitCompound(1, [][]byte{
+						asn1obj.Sequence([][]byte{
+							asn1obj.ObjectIdentifier(asn1obj.OIDrsaEncryptionPKCS1),
+							asn1.NullBytes,
+						}),
+						// RSAPublicKey SubjectPublicKeyInfo
+						asn1obj.BitString(
+							asn1obj.Sequence([][]byte{
+								asn1obj.Integer(privKey.PublicKey.N),
+								asn1obj.Integer(big.NewInt(int64(privKey.PublicKey.E))),
+							}),
+						),
+					}),
+				}),
+				// not 100% certain but appears to be rsa key byte len
+				asn1obj.Integer(big.NewInt(int64(privKey.PublicKey.N.BitLen() / 8))),
+			}),
+		})
+
+	default:
+		// panic if non-RSA key
+		panic("p15 key file for non-rsa key is unexpected and unsupported")
+	}
+
 	// private key object (slightly different than the key+cert format)
 	privateKey := asn1obj.Sequence([][]byte{
 		// commonObjectAttributes - Label
@@ -181,27 +214,7 @@ func (p15 *pkcs15KeyCert) toP15Key(keyEnvelope []byte) (key []byte, err error) {
 									asn1obj.BitString([]byte{byte(0b01000000)}),
 								}),
 
-								asn1obj.ExplicitCompound(1, [][]byte{
-									asn1obj.Sequence([][]byte{
-										asn1obj.ExplicitCompound(0, [][]byte{
-											asn1obj.ExplicitCompound(1, [][]byte{
-												asn1obj.Sequence([][]byte{
-													asn1obj.ObjectIdentifier(asn1obj.OIDrsaEncryptionPKCS1),
-													asn1.NullBytes,
-												}),
-												// RSAPublicKey SubjectPublicKeyInfo
-												asn1obj.BitString(
-													asn1obj.Sequence([][]byte{
-														asn1obj.Integer(p15.key.PublicKey.N),
-														asn1obj.Integer(big.NewInt(int64(p15.key.PublicKey.E))),
-													}),
-												),
-											}),
-										}),
-										// not 100% certain but appears to be rsa key byte len
-										asn1obj.Integer(big.NewInt(int64(p15.key.PublicKey.N.BitLen() / 8))),
-									}),
-								}),
+								pubKeyObj,
 							}),
 						}),
 					}),

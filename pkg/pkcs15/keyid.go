@@ -2,6 +2,7 @@ package pkcs15
 
 import (
 	"apc-p15-tool/pkg/tools/asn1obj"
+	"crypto/rsa"
 	"crypto/sha1"
 	"encoding/binary"
 	"math/big"
@@ -10,22 +11,6 @@ import (
 // keyId returns the keyId for the overall key object
 func (p15 *pkcs15KeyCert) keyId() []byte {
 	// object to hash is just the RawSubjectPublicKeyInfo
-
-	// Create Object to hash
-	// hashObj := asn1obj.Sequence([][]byte{
-	// 	asn1obj.Sequence([][]byte{
-	// 		// Key is RSA
-	// 		asn1obj.ObjectIdentifier(asn1obj.OIDrsaEncryptionPKCS1),
-	// 		asn1.NullBytes,
-	// 	}),
-	// 	// BIT STRING of rsa key public key
-	// 	asn1obj.BitString(
-	// 		asn1obj.Sequence([][]byte{
-	// 			asn1obj.Integer(p15.key.N),
-	// 			asn1obj.Integer((big.NewInt(int64(p15.key.E)))),
-	// 		}),
-	// 	),
-	// })
 
 	// SHA-1 Hash
 	hasher := sha1.New()
@@ -124,18 +109,28 @@ func (p15 *pkcs15KeyCert) keyIdInt7() []byte {
 }
 
 // keyIdInt8 returns the sequence for keyId with INT val of 8; This value is equivelant
-// to "pgp", which is PGP v3 key Id. This value is just the last 8 bytes of the public
-// key N value
+// to "pgp", which is PGP v3 key Id.
 func (p15 *pkcs15KeyCert) keyIdInt8() []byte {
-	nBytes := p15.key.N.Bytes()
+	var keyIdVal []byte
+
+	switch privKey := p15.key.(type) {
+	case *rsa.PrivateKey:
+		// RSA: The ID value is just the last 8 bytes of the public key N value
+		nBytes := privKey.N.Bytes()
+		keyIdVal = nBytes[len(nBytes)-8:]
+
+	default:
+		// panic if non-RSA key
+		panic("key id 8 for non-rsa key is unexpected and unsupported")
+	}
 
 	// object to return
-	obj := asn1obj.Sequence([][]byte{
+	idObj := asn1obj.Sequence([][]byte{
 		asn1obj.Integer(big.NewInt(8)),
-		asn1obj.OctetString(nBytes[len(nBytes)-8:]),
+		asn1obj.OctetString(keyIdVal),
 	})
 
-	return obj
+	return idObj
 }
 
 // bigIntToMpi returns the MPI (as defined in RFC 4880 s 3.2) from a given
@@ -156,33 +151,64 @@ func (p15 *pkcs15KeyCert) keyIdInt9() []byte {
 	// Public-Key packet starting with the version field.  The Key ID is the
 	// low-order 64 bits of the fingerprint.
 
-	// the entire Public-Key packet
+	// first make the public key packet
 	publicKeyPacket := []byte{}
 
 	// starting with the version field (A one-octet version number (4)).
 	publicKeyPacket = append(publicKeyPacket, byte(4))
 
 	// A four-octet number denoting the time that the key was created.
-	time := make([]byte, 4)
-
 	// NOTE: use cert validity start as proxy for key creation since key pem
 	// doesn't actually contain a created at time -- in reality notBefore tends
 	// to be ~ 1 hour ish BEFORE the cert was even created. Key would also
 	// obviously have to be created prior to the cert creation.
+	time := make([]byte, 4)
 	binary.BigEndian.PutUint32(time, uint32(p15.cert.NotBefore.Unix()))
 	publicKeyPacket = append(publicKeyPacket, time...)
 
-	// A one-octet number denoting the public-key algorithm of this key.
-	// 1 - RSA (Encrypt or Sign) [HAC]
-	publicKeyPacket = append(publicKeyPacket, byte(1))
+	// the next part is key type specific
+	switch privKey := p15.key.(type) {
+	case *rsa.PrivateKey:
+		// A one-octet number denoting the public-key algorithm of this key.
+		// 1 - RSA (Encrypt or Sign) [HAC]
+		publicKeyPacket = append(publicKeyPacket, byte(1))
 
-	// Algorithm-Specific Fields for RSA public keys:
-	// multiprecision integer (MPI) of RSA public modulus n
-	publicKeyPacket = append(publicKeyPacket, bigIntToMpi(p15.key.N)...)
+		// Algorithm-Specific Fields for RSA public keys:
+		// multiprecision integer (MPI) of RSA public modulus n
+		publicKeyPacket = append(publicKeyPacket, bigIntToMpi(privKey.N)...)
 
-	// MPI of RSA public encryption exponent e
-	e := big.NewInt(int64(p15.key.PublicKey.E))
-	publicKeyPacket = append(publicKeyPacket, bigIntToMpi(e)...)
+		// MPI of RSA public encryption exponent e
+		e := big.NewInt(int64(privKey.PublicKey.E))
+		publicKeyPacket = append(publicKeyPacket, bigIntToMpi(e)...)
+
+	// case *ecdsa.PrivateKey:
+	// 	// A one-octet number denoting the public-key algorithm of this key.
+	// 	// 19 - ECDSA public key algorithm (see rfc 6637 s. 5)
+	// 	publicKeyPacket = append(publicKeyPacket, uint8(19))
+
+	// 	// Algorithm-Specific Fields for ECDSA public keys (see rfc 6637 s. 11 table)
+	// 	// This is a length byte followed by the curve ID (length is the number of bytes the curve ID uses)
+	// 	switch privKey.Curve.Params().Name {
+	// 	case "P-256":
+	// 		// 1.2.840.10045.3.1.7    8   2A 86 48 CE 3D 03 01 07   NIST curve P-256
+	// 		publicKeyPacket = append(publicKeyPacket, byte(8))
+	// 		hex, _ := hex.DecodeString("2A8648CE3D030107")
+	// 		publicKeyPacket = append(publicKeyPacket, hex...)
+
+	// 	case "P-384":
+	// 		// 1.3.132.0.34           5   2B 81 04 00 22            NIST curve P-384
+	// 		publicKeyPacket = append(publicKeyPacket, byte(5))
+	// 		hex, _ := hex.DecodeString("2B81040022")
+	// 		publicKeyPacket = append(publicKeyPacket, hex...)
+
+	// 	default:
+	// 		panic(fmt.Sprintf("key id 9 for ecdsa key curve %s is unexpected and unsupported", privKey.Curve.Params().Name))
+	// 	}
+
+	default:
+		// panic if non-RSA key
+		panic("key id 9 for non-rsa key is unexpected and unsupported")
+	}
 
 	// Assemble the V4 byte array that will be hashed
 	// 0x99 (1 octet)
@@ -205,10 +231,10 @@ func (p15 *pkcs15KeyCert) keyIdInt9() []byte {
 	keyId := sha1Hash[len(sha1Hash)-8:]
 
 	// object to return
-	obj := asn1obj.Sequence([][]byte{
+	idObj := asn1obj.Sequence([][]byte{
 		asn1obj.Integer(big.NewInt(9)),
 		asn1obj.OctetString(keyId),
 	})
 
-	return obj
+	return idObj
 }

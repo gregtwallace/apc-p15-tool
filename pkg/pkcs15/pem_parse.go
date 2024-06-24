@@ -1,14 +1,14 @@
 package pkcs15
 
 import (
-	"crypto/rsa"
+	"crypto"
 	"crypto/x509"
 )
 
 // pkcs15KeyCert holds the data for a key and certificate pair; it provides
 // various methods to transform pkcs15 data
 type pkcs15KeyCert struct {
-	key  *rsa.PrivateKey
+	key  crypto.PrivateKey
 	cert *x509.Certificate
 }
 

@@ -1,24 +1,42 @@
 package pkcs15
 
-import "apc-p15-tool/pkg/tools/asn1obj"
+import (
+	"apc-p15-tool/pkg/tools/asn1obj"
+	"crypto/rsa"
+)
 
 // privateKeyObject returns the ASN.1 representation of a private key
 func (p15 *pkcs15KeyCert) privateKeyObject() []byte {
-	// ensure all expected vals are available
-	p15.key.Precompute()
+	var privKeyObj []byte
 
-	pkey := asn1obj.Sequence([][]byte{
-		// P
-		asn1obj.IntegerExplicitValue(3, p15.key.Primes[0]),
-		// Q
-		asn1obj.IntegerExplicitValue(4, p15.key.Primes[1]),
-		// Dp
-		asn1obj.IntegerExplicitValue(5, p15.key.Precomputed.Dp),
-		// Dq
-		asn1obj.IntegerExplicitValue(6, p15.key.Precomputed.Dq),
-		// Qinv
-		asn1obj.IntegerExplicitValue(7, p15.key.Precomputed.Qinv),
-	})
+	switch privKey := p15.key.(type) {
+	case *rsa.PrivateKey:
+		privKey.Precompute()
 
-	return pkey
+		// ensure all expected vals are available
+		privKeyObj = asn1obj.Sequence([][]byte{
+			// P
+			asn1obj.IntegerExplicitValue(3, privKey.Primes[0]),
+			// Q
+			asn1obj.IntegerExplicitValue(4, privKey.Primes[1]),
+			// Dp
+			asn1obj.IntegerExplicitValue(5, privKey.Precomputed.Dp),
+			// Dq
+			asn1obj.IntegerExplicitValue(6, privKey.Precomputed.Dq),
+			// Qinv
+			asn1obj.IntegerExplicitValue(7, privKey.Precomputed.Qinv),
+		})
+
+	// case *ecdsa.PrivateKey:
+	// 	// Only private piece is the integer D
+	// 	privKeyObj = asn1obj.Sequence([][]byte{
+	// 		asn1obj.Integer(privKey.D),
+	// 	})
+
+	default:
+		// panic if non-RSA key
+		panic("private key object for non-rsa key is unexpected and unsupported")
+	}
+
+	return privKeyObj
 }
