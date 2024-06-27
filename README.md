@@ -70,7 +70,7 @@ tool, and as such I have no way to generate files to reverse engineer.
 
 My setup (and therefore the testing setup) is:
 - APC Smart-UPS 1500VA RM 2U SUA1500RM2U (Firmware Revision 667.18.D)
-- AP9631 NMC2 Hardware Revision 05 running AOS v7.0.4 and Boot Monitor 
+- AP9631 NMC2 Hardware Revision 05 running AOS v7.1.2 and Boot Monitor 
   v1.0.9.
 
 If you have problems, please post the log in an issue and I can try to fix it
