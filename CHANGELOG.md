@@ -1,5 +1,12 @@
 # APC P15 Tool Changelog
 
+## [v1.0.0] - 2024-07-01
+
+First official stable release.
+
+Fixes Go version in Github action.
+
+
 ## [v0.5.3] - 2024-06-24
 
 Add 3,072 bit RSA key support.
