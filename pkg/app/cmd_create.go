@@ -51,11 +51,14 @@ func (app *app) cmdCreate(_ context.Context, args []string) error {
 	}
 	app.stdLogger.Printf("create: apc p15 key file %s written to disk", keyFileName)
 
-	err = os.WriteFile(keyCertFileName, apcKeyCertFile, 0600)
-	if err != nil {
-		return fmt.Errorf("create: failed to write apc p15 key+cert file (%s)", err)
+	// skip key+cert if it wasn't generated
+	if len(apcKeyCertFile) > 0 {
+		err = os.WriteFile(keyCertFileName, apcKeyCertFile, 0600)
+		if err != nil {
+			return fmt.Errorf("create: failed to write apc p15 key+cert file (%s)", err)
+		}
+		app.stdLogger.Printf("create: apc p15 key+cert file %s written to disk", keyCertFileName)
 	}
-	app.stdLogger.Printf("create: apc p15 key+cert file %s written to disk", keyCertFileName)
 
 	// if debug, write additional debug files (b64 format to make copy/paste into asn1 decoder
 	// easy to do e.g., https://lapo.it/asn1js)
@@ -67,19 +70,22 @@ func (app *app) cmdCreate(_ context.Context, args []string) error {
 		}
 		app.debugLogger.Printf("create: apc p15 key file %s written to disk", keyFileNameDebug)
 
-		keyCertFileNameDebug := keyCertFileName + ".noheader.b64"
-		err = os.WriteFile(keyCertFileNameDebug, []byte(base64.StdEncoding.EncodeToString(apcKeyCertFile[apcHeaderLen:])), 0600)
-		if err != nil {
-			return fmt.Errorf("create: failed to write apc p15 key+cert file (%s)", err)
-		}
-		app.debugLogger.Printf("create: apc p15 key+cert file %s written to disk", keyCertFileNameDebug)
+		// skip key+cert if it wasn't generated
+		if len(apcKeyCertFile) > 0 {
+			keyCertFileNameDebug := keyCertFileName + ".noheader.b64"
+			err = os.WriteFile(keyCertFileNameDebug, []byte(base64.StdEncoding.EncodeToString(apcKeyCertFile[apcHeaderLen:])), 0600)
+			if err != nil {
+				return fmt.Errorf("create: failed to write apc p15 key+cert file (%s)", err)
+			}
+			app.debugLogger.Printf("create: apc p15 key+cert file %s written to disk", keyCertFileNameDebug)
 
-		keyCertFileNameHeaderDebug := keyCertFileName + ".header.b64"
-		err = os.WriteFile(keyCertFileNameHeaderDebug, []byte(base64.StdEncoding.EncodeToString(apcKeyCertFile[:apcHeaderLen])), 0600)
-		if err != nil {
-			return fmt.Errorf("create: failed to write apc p15 key+cert file (%s)", err)
+			keyCertFileNameHeaderDebug := keyCertFileName + ".header.b64"
+			err = os.WriteFile(keyCertFileNameHeaderDebug, []byte(base64.StdEncoding.EncodeToString(apcKeyCertFile[:apcHeaderLen])), 0600)
+			if err != nil {
+				return fmt.Errorf("create: failed to write apc p15 key+cert file (%s)", err)
+			}
+			app.debugLogger.Printf("create: apc p15 key+cert file header %s written to disk", keyCertFileNameHeaderDebug)
 		}
-		app.debugLogger.Printf("create: apc p15 key+cert file header %s written to disk", keyCertFileNameHeaderDebug)
 
 	}
 

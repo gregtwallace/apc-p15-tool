@@ -11,6 +11,10 @@ var (
 	OIDdesEDE3CBC         = asn1.ObjectIdentifier{1, 2, 840, 113549, 3, 7}            // des-EDE3-CBC (RSADSI encryptionAlgorithm)
 	OIDpkcs7Data          = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 7, 1}         // data (PKCS #7)
 	OIDauthEnc128         = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 9, 16, 3, 15} // authEnc128 (S/MIME Algorithms)
+	OIDecPublicKey        = asn1.ObjectIdentifier{1, 2, 840, 10045, 2, 1}             // ecPublicKey (ANSI X9.62 public key type)
+	OIDprime256v1         = asn1.ObjectIdentifier{1, 2, 840, 10045, 3, 1, 7}          //  prime256v1 (ANSI X9.62 named elliptic curve)
+	OIDsecp384r1          = asn1.ObjectIdentifier{1, 3, 132, 0, 34}                   //  secp384r1 (SECG (Certicom) named elliptic curve)
+	OIDsecp521r1          = asn1.ObjectIdentifier{1, 3, 132, 0, 35}                   //  secp521r1 (SECG (Certicom) named elliptic curve)
 )
 
 // ObjectIdentifier returns an ASN.1 OBJECT IDENTIFIER with the oidValue bytes

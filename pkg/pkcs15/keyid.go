@@ -2,6 +2,7 @@ package pkcs15
 
 import (
 	"apc-p15-tool/pkg/tools/asn1obj"
+	"crypto/ecdsa"
 	"crypto/rsa"
 	"crypto/sha1"
 	"encoding/binary"
@@ -119,9 +120,13 @@ func (p15 *pkcs15KeyCert) keyIdInt8() []byte {
 		nBytes := privKey.N.Bytes()
 		keyIdVal = nBytes[len(nBytes)-8:]
 
+	case *ecdsa.PrivateKey:
+		// don't use this key id, leave empty
+		return nil
+
 	default:
-		// panic if non-RSA key
-		panic("key id 8 for non-rsa key is unexpected and unsupported")
+		// panic if unexpected key type
+		panic("key id 8 for key is unexpected and unsupported")
 	}
 
 	// object to return
@@ -181,33 +186,13 @@ func (p15 *pkcs15KeyCert) keyIdInt9() []byte {
 		e := big.NewInt(int64(privKey.PublicKey.E))
 		publicKeyPacket = append(publicKeyPacket, bigIntToMpi(e)...)
 
-	// case *ecdsa.PrivateKey:
-	// 	// A one-octet number denoting the public-key algorithm of this key.
-	// 	// 19 - ECDSA public key algorithm (see rfc 6637 s. 5)
-	// 	publicKeyPacket = append(publicKeyPacket, uint8(19))
-
-	// 	// Algorithm-Specific Fields for ECDSA public keys (see rfc 6637 s. 11 table)
-	// 	// This is a length byte followed by the curve ID (length is the number of bytes the curve ID uses)
-	// 	switch privKey.Curve.Params().Name {
-	// 	case "P-256":
-	// 		// 1.2.840.10045.3.1.7    8   2A 86 48 CE 3D 03 01 07   NIST curve P-256
-	// 		publicKeyPacket = append(publicKeyPacket, byte(8))
-	// 		hex, _ := hex.DecodeString("2A8648CE3D030107")
-	// 		publicKeyPacket = append(publicKeyPacket, hex...)
-
-	// 	case "P-384":
-	// 		// 1.3.132.0.34           5   2B 81 04 00 22            NIST curve P-384
-	// 		publicKeyPacket = append(publicKeyPacket, byte(5))
-	// 		hex, _ := hex.DecodeString("2B81040022")
-	// 		publicKeyPacket = append(publicKeyPacket, hex...)
-
-	// 	default:
-	// 		panic(fmt.Sprintf("key id 9 for ecdsa key curve %s is unexpected and unsupported", privKey.Curve.Params().Name))
-	// 	}
+	case *ecdsa.PrivateKey:
+		// don't use this key id, leave empty
+		return nil
 
 	default:
-		// panic if non-RSA key
-		panic("key id 9 for non-rsa key is unexpected and unsupported")
+		// panic if unexpected key type
+		panic("key id 9 for key is unexpected and unsupported")
 	}
 
 	// Assemble the V4 byte array that will be hashed
