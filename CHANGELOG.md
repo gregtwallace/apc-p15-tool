@@ -1,5 +1,15 @@
 # APC P15 Tool Changelog
 
+## [v1.1.0-b1] - 2024-07-09
+
+BETA: First effort to add support for EC key support for NMC3.
+
+This version also enables RSA 4,092 bit length. Code was updated
+so the NMC2 key+cert file is not generated when NMC2 is not
+supported. Log messages were also updated to signal user when
+a compatibility issue is present.
+
+
 ## [v1.0.0] - 2024-07-01
 
 First official stable release.
