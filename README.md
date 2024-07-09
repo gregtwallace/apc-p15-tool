@@ -5,6 +5,14 @@ creating and installing SSL certificates on APC (Schneider Electric)
 Network Management Cards (2 & 3) simple and easy to do. It is also 
 designed to simplify automation of the certificate management lifecycle.
 
+## Help Needed from NMC3 Users!
+
+If you have an NMC3, please test the beta release (1.1.0-b). In particular,
+please provide feedback if 4,092 bit RSA keys and EC keys of curve types
+P-256, P-384, and P-521 work using the beta and your NMC3.
+
+see: https://github.com/gregtwallace/apc-p15-tool/issues/6
+
 ## Background
 
 When APC created the NMC2 (Network Management Card 2), they chose to use 
