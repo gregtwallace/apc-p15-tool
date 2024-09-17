@@ -66,23 +66,36 @@ and licensed under the GPL-3.0 license.
 Both NMC2 and NMC3 devices should be fully supported. However, I have one
 NMC2 device in a home lab and have no way to guarantee success in all cases.
 
-Only RSA 1,024, 2,048, and 3,072 bit keys are accepted. 1,024 bit RSA is no
-longer considered completely secure; avoid keys of this size if possible. Most 
-(all?) public ACME services won't accept keys of this size anyway.
+### Key Types and Sizes
 
-NMC2 does not officially support the 3,072 bit key size, however, it works fine
-on my NMC2. If you use this size and it doesn't work on your NMC2, try a 2,048
-bit key instead. Later versions of the NMC3 firmware support RSA 4,096 and 
-ECDSA keys, but this tool does not. ECDSA was not included in APC's proprietary
-tool, and as such I have no way to generate files to reverse engineer.
+NMC2:
+- RSA 1,024, 2,048, 3,072* bit lengths.
+
+NMC3:
+- RSA 1,024, 2,048, 3,072, and 4,092 bit lengths.
+- ECDSA curves P-256, P-384, and P-521. 
+
+* 3,072 bit length is not officially supported by my NMC2, but appears to work
+  fine.
+
+1,024 bit RSA is no longer considered completely secure; avoid keys of 
+this size if possible. Most (all?) public ACME services won't accept keys 
+of this size anyway.
+
+### General Troubleshooting
 
 My setup (and therefore the testing setup) is:
 - APC Smart-UPS 1500VA RM 2U SUA1500RM2U (Firmware Revision 667.18.D)
 - AP9631 NMC2 Hardware Revision 05 running AOS v7.1.2 and Boot Monitor 
   v1.0.9.
 
-If you have problems, please post the log in an issue and I can try to fix it
-but it may be difficult without your particular hardware to test with.
+If you have trouble, your first step should be to update your NMC's firmware.
+Many issues with this tool will be resolved simply by updating to the newest
+firmware.
+
+If you have a problem after that, please post the log in an issue and I can 
+try to fix it but it may be difficult without your particular hardware to 
+test with.
 
 In particular, if you are experiencing `ssh: handshake failed:` first try
 using the `--insecurecipher` flag. If this works, you should upgrade your

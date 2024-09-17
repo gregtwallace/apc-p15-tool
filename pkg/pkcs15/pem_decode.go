@@ -2,6 +2,7 @@ package pkcs15
 
 import (
 	"crypto"
+	"crypto/ecdsa"
 	"crypto/rsa"
 	"crypto/tls"
 	"crypto/x509"
@@ -9,21 +10,27 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"slices"
 )
 
 var (
 	errPemKeyBadBlock       = errors.New("pkcs15: pem key: failed to decode pem block")
 	errPemKeyFailedToParse  = errors.New("pkcs15: pem key: failed to parse key")
-	errPemKeyWrongBlockType = errors.New("pkcs15: pem key: unsupported pem block type (only pkcs1 and pkcs8 supported)")
-	errPemKeyWrongType      = errors.New("pkcs15: pem key: unsupported key type (only rsa 1,024, 2,048, and 3,072 supported)")
+	errPemKeyWrongBlockType = errors.New("pkcs15: pem key: unsupported pem block type")
+	errKeyWrongType         = errors.New("pkcs15: pem key: unsupported key type")
 
 	errPemCertBadBlock      = errors.New("pkcs15: pem cert: failed to decode pem block")
 	errPemCertFailedToParse = errors.New("pkcs15: pem cert: failed to parse cert")
 )
 
+var (
+	supportedRSASizes    = []int{1024, 2048, 3072, 4096}
+	supportedECDSACurves = []string{"P-256", "P-384", "P-521"}
+)
+
 // pemKeyDecode attempts to decode a pem encoded byte slice and then attempts
-// to parse an RSA private key from the decoded pem block. an error is returned
-// if any of these steps fail OR if the key is not RSA and of bitlen 1,024 or 2,048
+// to parse a private key from the decoded pem block. an error is returned
+// if any of these steps fail OR if the key is not supported.
 func pemKeyDecode(keyPem []byte) (crypto.PrivateKey, error) {
 	// decode
 	pemBlock, _ := pem.Decode([]byte(keyPem))
@@ -47,28 +54,27 @@ func pemKeyDecode(keyPem []byte) (crypto.PrivateKey, error) {
 			return nil, fmt.Errorf("pkcs15: pem key: failed sanity check (%s)", err)
 		}
 
-		// verify proper bitlen
-		if rsaKey.N.BitLen() != 1024 && rsaKey.N.BitLen() != 2048 && rsaKey.N.BitLen() != 3072 {
-			return nil, errPemKeyWrongType
+		// verify supported rsa bitlen
+		if !slices.Contains(supportedRSASizes, rsaKey.N.BitLen()) {
+			return nil, errKeyWrongType
 		}
 
 		// good to go
 		privateKey = rsaKey
 
-	// case "EC PRIVATE KEY": // SEC1, ASN.1
-	// 	var ecdKey *ecdsa.PrivateKey
-	// 	ecdKey, err := x509.ParseECPrivateKey(pemBlock.Bytes)
-	// 	if err != nil {
-	// 		return nil, errPemKeyFailedToParse
-	// 	}
+	case "EC PRIVATE KEY": // SEC1, ASN.1
+		ecdKey, err := x509.ParseECPrivateKey(pemBlock.Bytes)
+		if err != nil {
+			return nil, errPemKeyFailedToParse
+		}
 
-	// 	// verify acceptable curve name
-	// 	if ecdKey.Curve.Params().Name != "P-256" && ecdKey.Curve.Params().Name != "P-384" {
-	// 		return nil, errPemKeyWrongType
-	// 	}
+		// verify supported curve name
+		if !slices.Contains(supportedECDSACurves, ecdKey.Curve.Params().Name) {
+			return nil, errKeyWrongType
+		}
 
-	// 	// good to go
-	// 	privateKey = ecdKey
+		// good to go
+		privateKey = ecdKey
 
 	case "PRIVATE KEY": // PKCS8
 		pkcs8Key, err := x509.ParsePKCS8PrivateKey(pemBlock.Bytes)
@@ -84,25 +90,25 @@ func pemKeyDecode(keyPem []byte) (crypto.PrivateKey, error) {
 				return nil, fmt.Errorf("pkcs15: pem key: failed sanity check (%s)", err)
 			}
 
-			// verify proper bitlen
-			if pkcs8Key.N.BitLen() != 1024 && pkcs8Key.N.BitLen() != 2048 && pkcs8Key.N.BitLen() != 3072 {
-				return nil, errPemKeyWrongType
+			// verify supported rsa bitlen
+			if !slices.Contains(supportedRSASizes, pkcs8Key.N.BitLen()) {
+				return nil, errKeyWrongType
 			}
 
 			// good to go
 			privateKey = pkcs8Key
 
-		// case *ecdsa.PrivateKey:
-		// 	// verify acceptable curve name
-		// 	if pkcs8Key.Curve.Params().Name != "P-256" && pkcs8Key.Curve.Params().Name != "P-384" {
-		// 		return nil, errPemKeyWrongType
-		// 	}
+		case *ecdsa.PrivateKey:
+			// verify supported curve name
+			if !slices.Contains(supportedECDSACurves, pkcs8Key.Curve.Params().Name) {
+				return nil, errKeyWrongType
+			}
 
-		// 	// good to go
-		// 	privateKey = pkcs8Key
+			// good to go
+			privateKey = pkcs8Key
 
 		default:
-			return nil, errPemKeyWrongType
+			return nil, errKeyWrongType
 		}
 
 	default:

@@ -68,9 +68,9 @@ func (app *app) getConfig(args []string) error {
 	// create -- subcommand
 	createFlags := ff.NewFlagSet("create").SetParent(rootFlags)
 
-	cfg.create.keyPemFilePath = createFlags.StringLong("keyfile", "", "path and filename of the rsa-1024 or rsa-2048 key in pem format")
+	cfg.create.keyPemFilePath = createFlags.StringLong("keyfile", "", "path and filename of the key in pem format")
 	cfg.create.certPemFilePath = createFlags.StringLong("certfile", "", "path and filename of the certificate in pem format")
-	cfg.create.keyPem = createFlags.StringLong("keypem", "", "string of the rsa-1024 or rsa-2048 key in pem format")
+	cfg.create.keyPem = createFlags.StringLong("keypem", "", "string of the key in pem format")
 	cfg.create.certPem = createFlags.StringLong("certpem", "", "string of the certificate in pem format")
 	cfg.create.outFilePath = createFlags.StringLong("outfile", createDefaultOutFilePath, "path and filename to write the key+cert p15 file to")
 	cfg.create.outKeyFilePath = createFlags.StringLong("outkeyfile", createDefaultOutKeyFilePath, "path and filename to write the key p15 file to")
@@ -88,9 +88,9 @@ func (app *app) getConfig(args []string) error {
 	// install -- subcommand
 	installFlags := ff.NewFlagSet("install").SetParent(rootFlags)
 
-	cfg.install.keyPemFilePath = installFlags.StringLong("keyfile", "", "path and filename of the rsa-1024 or rsa-2048 key in pem format")
+	cfg.install.keyPemFilePath = installFlags.StringLong("keyfile", "", "path and filename of the key in pem format")
 	cfg.install.certPemFilePath = installFlags.StringLong("certfile", "", "path and filename of the certificate in pem format")
-	cfg.install.keyPem = installFlags.StringLong("keypem", "", "string of the rsa-1024 or rsa-2048 key in pem format")
+	cfg.install.keyPem = installFlags.StringLong("keypem", "", "string of the key in pem format")
 	cfg.install.certPem = installFlags.StringLong("certpem", "", "string of the certificate in pem format")
 	cfg.install.hostAndPort = installFlags.StringLong("apchost", "", "hostname:port of the apc ups to install the certificate on")
 	cfg.install.fingerprint = installFlags.StringLong("fingerprint", "", "the SHA256 fingerprint value of the ups' ssh server")

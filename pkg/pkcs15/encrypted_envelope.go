@@ -21,14 +21,19 @@ const (
 	apcKEKIterations = 5000
 )
 
-// encryptedKeyEnvelope encrypts p15's rsa private key using the algorithms and
-// params expected in the APC file. Salt values are always random.
-func (p15 *pkcs15KeyCert) encryptedKeyEnvelope() ([]byte, error) {
+// encryptedKeyEnvelope encrypts p15's private key using the algorithms and
+// params expected in the APC file.
+func (p15 *pkcs15KeyCert) computeEncryptedKeyEnvelope() error {
+	// if computation already performed, this is a no-op (keep existing envelope)
+	if p15.envelopedPrivateKey != nil && len(p15.envelopedPrivateKey) != 0 {
+		return nil
+	}
+
 	// calculate values for the object
 	kekSalt := make([]byte, 8)
 	_, err := rand.Read(kekSalt)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// kek hash alg
@@ -42,7 +47,7 @@ func (p15 *pkcs15KeyCert) encryptedKeyEnvelope() ([]byte, error) {
 	// make DES cipher from KEK for CEK
 	cekDesCipher, err := des.NewTripleDESCipher(kek)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// cek (16 bytes for authEnc128) -- see: rfc3211
@@ -50,7 +55,7 @@ func (p15 *pkcs15KeyCert) encryptedKeyEnvelope() ([]byte, error) {
 	cek := make([]byte, cekLen)
 	_, err = rand.Read(cek)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// LEN + Check Val [3]
@@ -71,7 +76,7 @@ func (p15 *pkcs15KeyCert) encryptedKeyEnvelope() ([]byte, error) {
 	cekPadding := make([]byte, cekPadLen)
 	_, err = rand.Read(cekPadding)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	wrappedCEK = append(wrappedCEK, cekPadding...)
@@ -80,7 +85,7 @@ func (p15 *pkcs15KeyCert) encryptedKeyEnvelope() ([]byte, error) {
 	cekEncryptSalt := make([]byte, 8)
 	_, err = rand.Read(cekEncryptSalt)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	cekEncrypter := cipher.NewCBCEncrypter(cekDesCipher, cekEncryptSalt)
@@ -94,13 +99,13 @@ func (p15 *pkcs15KeyCert) encryptedKeyEnvelope() ([]byte, error) {
 	contentEncSalt := make([]byte, 8)
 	_, err = rand.Read(contentEncSalt)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	contentEncryptKey := pbkdf2.Key(cek, []byte("encryption"), 1, 24, sha1.New)
 	contentDesCipher, err := des.NewTripleDESCipher(contentEncryptKey)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// envelope content (that will be encrypted)
@@ -151,7 +156,7 @@ func (p15 *pkcs15KeyCert) encryptedKeyEnvelope() ([]byte, error) {
 	// make MAC
 	_, err = macHasher.Write(hashMe)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	mac := macHasher.Sum(nil)
 
@@ -218,5 +223,7 @@ func (p15 *pkcs15KeyCert) encryptedKeyEnvelope() ([]byte, error) {
 		finalEnv = append(finalEnv, envelope[i]...)
 	}
 
-	return finalEnv, nil
+	// set p15 struct envelope
+	p15.envelopedPrivateKey = finalEnv
+	return nil
 }
