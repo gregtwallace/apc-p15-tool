@@ -1,5 +1,24 @@
 # APC P15 Tool Changelog
 
+## [v1.1.0] - 2024-09-17
+
+> [!IMPORTANT]
+> The flag `apchost` on the `install` command has been renamed to
+> `hostname`. This flag should contain the hostname only. If a non-
+> default SSH port is needed, specify it in the `sshport` flag.
+
+This version brings support for for RSA 4,092 bit and EC keys. These 
+keys are only compatible with NMC3 running newer firmwares. To know 
+if your firmware is new enough, SSH into your UPS and type `ssh` and enter.
+If the UPS responds `Command Not Found` the firmware is too old or
+otherwise incompatible.
+
+This version also adds a post `install` check that connects to the web
+ui and verifies the certificate served is the expected one. You can
+specify a non standard ssl port with the `sslport` flag or skip the check
+entirely with the `skipverify` flag.
+
+
 ## [v1.0.0] - 2024-07-01
 
 First official stable release.
