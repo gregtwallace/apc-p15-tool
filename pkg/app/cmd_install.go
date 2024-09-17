@@ -2,9 +2,14 @@ package app
 
 import (
 	"apc-p15-tool/pkg/apcssh"
+	"bytes"
 	"context"
+	"crypto/tls"
+	"encoding/pem"
 	"errors"
 	"fmt"
+	"strconv"
+	"time"
 )
 
 // cmdInstall is the app's command to create apc p15 file content from key and cert
@@ -36,7 +41,9 @@ func (app *app) cmdInstall(cmdCtx context.Context, args []string) error {
 	}
 
 	// host to install on must be specified
-	if app.config.install.hostAndPort == nil || *app.config.install.hostAndPort == "" {
+	if app.config.install.hostname == nil || *app.config.install.hostname == "" ||
+		app.config.install.sshport == nil || *app.config.install.sshport == 0 {
+
 		return errors.New("install: failed, apc host not specified")
 	}
 
@@ -55,7 +62,7 @@ func (app *app) cmdInstall(cmdCtx context.Context, args []string) error {
 
 	// make APC SSH client
 	cfg := &apcssh.Config{
-		Hostname:          *app.config.install.hostAndPort,
+		Hostname:          *app.config.install.hostname + ":" + strconv.Itoa(*app.config.install.sshport),
 		Username:          *app.config.install.username,
 		Password:          *app.config.install.password,
 		ServerFingerprint: *app.config.install.fingerprint,
@@ -75,7 +82,7 @@ func (app *app) cmdInstall(cmdCtx context.Context, args []string) error {
 	}
 
 	// installed
-	app.stdLogger.Printf("install: apc p15 file installed on %s", *app.config.install.hostAndPort)
+	app.stdLogger.Printf("install: apc p15 file installed on %s", *app.config.install.hostname)
 
 	// restart UPS webUI
 	if app.config.install.restartWebUI != nil && *app.config.install.restartWebUI {
@@ -87,6 +94,49 @@ func (app *app) cmdInstall(cmdCtx context.Context, args []string) error {
 		}
 
 		app.stdLogger.Println("install: sent webui restart command")
+	}
+
+	// check the new certificate is installed
+	if app.config.install.skipVerify != nil && !*app.config.install.skipVerify &&
+		app.config.install.webUISSLPort != nil && *app.config.install.webUISSLPort != 0 {
+
+		app.stdLogger.Println("install: attempting to verify certificate install...")
+
+		// sleep for UPS to finish anything it might be doing
+		time.Sleep(5 * time.Second)
+
+		// if UPS web UI was restarted, sleep longer
+		if app.config.install.restartWebUI != nil && *app.config.install.restartWebUI {
+			app.stdLogger.Println("install: waiting for ups webui restart...")
+			time.Sleep(25 * time.Second)
+		}
+
+		// connect to the web UI to get the current certificate
+		conf := &tls.Config{
+			InsecureSkipVerify: true,
+		}
+		conn, err := tls.Dial("tcp", *app.config.install.hostname+":"+strconv.Itoa(*app.config.install.webUISSLPort), conf)
+		if err != nil {
+			return fmt.Errorf("install: failed to dial webui for verification (%s)", err)
+		}
+		defer conn.Close()
+
+		// get top cert
+		leafCert := conn.ConnectionState().PeerCertificates[0]
+		if leafCert == nil {
+			return fmt.Errorf("install: failed to get web ui leaf cert for verification (%s)", err)
+		}
+
+		// convert pem to DER for comparison
+		pemBlock, _ := pem.Decode(certPem)
+
+		// verify cert is the correct one
+		certVerified := bytes.Equal(leafCert.Raw, pemBlock.Bytes)
+		if !certVerified {
+			return errors.New("install: web ui leaf cert does not match new cert")
+		}
+
+		app.stdLogger.Println("install: ups web ui cert verified")
 	}
 
 	return nil

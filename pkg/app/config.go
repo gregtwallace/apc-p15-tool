@@ -33,11 +33,14 @@ type config struct {
 	}
 	install struct {
 		keyCertPemCfg
-		hostAndPort    *string
+		hostname       *string
+		sshport        *int
 		fingerprint    *string
 		username       *string
 		password       *string
 		restartWebUI   *bool
+		webUISSLPort   *int
+		skipVerify     *bool
 		insecureCipher *bool
 	}
 }
@@ -92,16 +95,19 @@ func (app *app) getConfig(args []string) error {
 	cfg.install.certPemFilePath = installFlags.StringLong("certfile", "", "path and filename of the certificate in pem format")
 	cfg.install.keyPem = installFlags.StringLong("keypem", "", "string of the key in pem format")
 	cfg.install.certPem = installFlags.StringLong("certpem", "", "string of the certificate in pem format")
-	cfg.install.hostAndPort = installFlags.StringLong("apchost", "", "hostname:port of the apc ups to install the certificate on")
+	cfg.install.hostname = installFlags.StringLong("hostname", "", "hostname of the apc ups to install the certificate on")
+	cfg.install.sshport = installFlags.IntLong("sshport", 22, "apc ups ssh port number")
 	cfg.install.fingerprint = installFlags.StringLong("fingerprint", "", "the SHA256 fingerprint value of the ups' ssh server")
 	cfg.install.username = installFlags.StringLong("username", "", "username to login to the apc ups")
 	cfg.install.password = installFlags.StringLong("password", "", "password to login to the apc ups")
 	cfg.install.restartWebUI = installFlags.BoolLong("restartwebui", "some devices may need a webui restart to begin using the new cert, enabling this option sends the restart command after the p15 is installed")
+	cfg.install.webUISSLPort = installFlags.IntLong("sslport", 443, "apc ups ssl webui port number")
+	cfg.install.skipVerify = installFlags.BoolLong("skipverify", "the tool will try to connect to the UPS web UI to verify install success; this flag disables that check")
 	cfg.install.insecureCipher = installFlags.BoolLong("insecurecipher", "allows the use of insecure ssh ciphers (NOT recommended)")
 
 	installCmd := &ff.Command{
 		Name:      "install",
-		Usage:     "apc-p15-tool install --keyfile key.pem --certfile cert.pem --apchost example.com:22 --fingerprint 123abc --username apc --password test",
+		Usage:     "apc-p15-tool install --keyfile key.pem --certfile cert.pem --hostname example.com --fingerprint 123abc --username apc --password test",
 		ShortHelp: "install the specified key and cert pem files on an apc ups (they will be converted to a comaptible p15 file)",
 		Flags:     installFlags,
 		Exec:      app.cmdInstall,

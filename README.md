@@ -145,7 +145,7 @@ disk. It instead installs the files directly on the NMC. Logic
 automatically deduces if the device is an NMC2 or NMC3 and performs
 the appropriate installation steps.
 
-e.g. `./apc-p15-tool install --keyfile ./apckey.pem --certfile ./apccert.pem --apchost myapc.example.com:22 --username apc --password someSecret --fingerprint 123abc`
+e.g. `./apc-p15-tool install --keyfile ./apckey.pem --certfile ./apccert.pem --hostname myapc.example.com --username apc --password someSecret --fingerprint 123abc`
 
 ## Note About Install Automation
 
