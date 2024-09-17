@@ -67,9 +67,10 @@ NMC3*:
 - RSA 1,024, 2,048, 3,072, and 4,092 bit lengths.
 - ECDSA curves P-256, P-384, and P-521. 
 
-* 3,072 bit length is not officially supported by my NMC2, but appears to work
+\* 3,072 bit length is not officially supported by my NMC2, but appears to work
   fine.
-* The additional key types supported by NMC3 require newer firmware on the
+
+\* The additional key types supported by NMC3 require newer firmware on the
   device. I am unsure what the version cutoff is, but you can check support
   by connecting to the UPS via SSH and typing `ssl`. If `Command Not Found`
   is returned, the firmware is too old and only the key types listed under
