@@ -1,5 +1,15 @@
 # APC P15 Tool Changelog
 
+## [v1.2.0] - 2025-01-27
+
+Add a new feature to `install` that checks the time of the UPS to confirm
+it is accurate. A log message is added that advises either way. Even if
+the check fails, the install still proceeds with attempting to install
+the new certificate.
+
+Dependencies were also all updated.
+
+
 ## [v1.1.0] - 2024-09-17
 
 > [!IMPORTANT]
