@@ -12,6 +12,8 @@ import (
 	"time"
 )
 
+const timeLoggingFormat = time.RFC1123Z
+
 // cmdInstall is the app's command to create apc p15 file content from key and cert
 // pem files and upload the p15 to the specified APC UPS
 func (app *app) cmdInstall(cmdCtx context.Context, args []string) error {
@@ -74,6 +76,16 @@ func (app *app) cmdInstall(cmdCtx context.Context, args []string) error {
 		return fmt.Errorf("install: failed to connect to host (%w)", err)
 	}
 	app.stdLogger.Println("install: connected to ups ssh, installing ssl key and cert...")
+
+	// check time - don't fail it time is no good, just do logging here
+	upsT, err := client.GetTime()
+	if err != nil {
+		app.errLogger.Printf("warn: install: failed to fetch UPS time (%s), you should manually verify the time is correct on the UPS", err)
+	} else if upsT.After(time.Now().Add(1*time.Hour)) || upsT.Before(time.Now().Add(-1*time.Hour)) {
+		app.errLogger.Printf("warn: install: UPS clock skew detected (this system's time is %s vs. UPS time %s", time.Now().Format(timeLoggingFormat), upsT.Format(timeLoggingFormat))
+	} else {
+		app.stdLogger.Printf("install: UPS clock appears correct (%s)", upsT.Format(timeLoggingFormat))
+	}
 
 	// install SSL Cert
 	err = client.InstallSSLCert(keyP15, certPem, keyCertP15)
