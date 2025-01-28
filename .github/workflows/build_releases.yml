@@ -12,7 +12,7 @@ env:
 
 jobs:
   build-common:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout Main Repo
@@ -41,7 +41,7 @@ jobs:
           path: ./CHANGELOG.md
 
   build-linux-arm64:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
@@ -90,7 +90,7 @@ jobs:
           path: ./apc-p15-install
 
   build-linux-amd64:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout Backend Repo
         uses: actions/checkout@v4
@@ -173,7 +173,7 @@ jobs:
 
   release-file-linux-arm64:
     needs: [build-common, build-linux-arm64]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Make release directory
@@ -217,7 +217,7 @@ jobs:
 
   release-file-linux-amd64:
     needs: [build-common, build-linux-amd64]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Make release directory
@@ -261,7 +261,7 @@ jobs:
 
   release-file-windows-amd64:
     needs: [build-common, build-windows-amd64]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Make release directory
