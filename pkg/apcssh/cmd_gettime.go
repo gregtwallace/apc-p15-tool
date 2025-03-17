@@ -28,6 +28,11 @@ func (cli *Client) GetTime() (time.Time, error) {
 	formatUPSVal := datePieces[3]
 	timeZoneVal := datePieces[4]
 
+	// GMT time requires + prefix
+	if timeZoneVal == "00:00" {
+		timeZoneVal = "+" + timeZoneVal
+	}
+
 	// known APC UPS format strings
 	dateFormatVal := ""
 	switch formatUPSVal {
