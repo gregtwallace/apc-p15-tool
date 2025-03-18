@@ -1,5 +1,12 @@
 # APC P15 Tool Changelog
 
+## [v1.2.1] - 2025-03-17
+
+Fix time check for UPS when it is set to GMT timezone.
+
+All dependencies updated.
+
+
 ## [v1.2.0] - 2025-01-27
 
 Add a new feature to `install` that checks the time of the UPS to confirm
