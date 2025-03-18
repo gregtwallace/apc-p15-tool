@@ -29,6 +29,7 @@ func (cli *Client) GetTime() (time.Time, error) {
 	timeZoneVal := datePieces[4]
 
 	// GMT time requires + prefix
+	// APC UPS fails to use the required +, so add it
 	if timeZoneVal == "00:00" {
 		timeZoneVal = "+" + timeZoneVal
 	}
