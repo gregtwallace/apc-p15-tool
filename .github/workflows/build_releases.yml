@@ -8,7 +8,7 @@ on:
 
 env:
   GITHUB_REF: ${{ github.ref }}
-  GO_VERSION: '1.23.5'
+  GO_VERSION: '1.24.1'
 
 jobs:
   build-common:
