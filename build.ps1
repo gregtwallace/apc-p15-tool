@@ -34,3 +34,25 @@ $env:GOARCH = "arm64"
 $env:GOOS = "linux"
 $env:CGO_ENABLED = 0
 go build -o $outDir/apc-p15-install-arm64 ./cmd/install_only
+
+# Darwin (MacOS) amd64
+$env:GOARCH = "amd64"
+$env:GOOS = "darwin"
+$env:CGO_ENABLED = 0
+go build -o $outDir/apc-p15-tool-darwin-amd64 ./cmd/tool
+
+$env:GOARCH = "amd64"
+$env:GOOS = "darwin"
+$env:CGO_ENABLED = 0
+go build -o $outDir/apc-p15-install-darwin-amd64 ./cmd/install_only
+
+# Darwin (MacOS) arm64
+$env:GOARCH = "arm64"
+$env:GOOS = "darwin"
+$env:CGO_ENABLED = 0
+go build -o $outDir/apc-p15-tool-darwin-arm64 ./cmd/tool
+
+$env:GOARCH = "arm64"
+$env:GOOS = "darwin"
+$env:CGO_ENABLED = 0
+go build -o $outDir/apc-p15-install-darwin-arm64 ./cmd/install_only
