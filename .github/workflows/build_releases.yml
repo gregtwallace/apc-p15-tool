@@ -43,7 +43,7 @@ jobs:
 ###
 
   build-linux-arm64:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-24.04-arm
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
@@ -51,12 +51,6 @@ jobs:
           repository: gregtwallace/apc-p15-tool
           ref: ${{ env.GITHUB_REF }}
           fetch-depth: 0
-
-      - name: Update apt
-        run: sudo apt update
-
-      - name: Install cross-compiler for linux/arm64
-        run: sudo apt-get -y install gcc-aarch64-linux-gnu
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -68,7 +62,6 @@ jobs:
         env:
           GOOS: linux
           GOARCH: arm64
-          CC: aarch64-linux-gnu-gcc
           CGO_ENABLED: 0
 
       - name: Save Compiled Binary
