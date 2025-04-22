@@ -5,10 +5,10 @@ go 1.24.2
 require (
 	github.com/peterbourgon/ff/v4 v4.0.0-alpha.4
 	github.com/sigurn/crc16 v0.0.0-20240131213347-83fcde1e29d1
-	golang.org/x/crypto v0.36.0
+	golang.org/x/crypto v0.37.0
 )
 
-require golang.org/x/sys v0.31.0 // indirect
+require golang.org/x/sys v0.32.0 // indirect
 
 replace apc-p15-tool/cmd/install_only => /cmd/install_only
 
