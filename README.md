@@ -171,6 +171,11 @@ separate script.
 
 ![Cert Warden with APC P15 Tool](https://raw.githubusercontent.com/gregtwallace/apc-p15-tool/main/img/apc-p15-tool.png)
 
+## Links
+
+@Owl-Tec's write up using this tool with ACDS: 
+https://owltec.ca/Windows+Server/Deploying+An+Internal+HTTPS+Certificate+for+a+UPS+APC+with+ADCS+(Active+Directory+Certificate+Services)+with+APC+P15+Tool
+
 ## Thanks
 
 Special thanks to the following people and resources which helped me 
