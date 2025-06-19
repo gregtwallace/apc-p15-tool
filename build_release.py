@@ -32,6 +32,8 @@ targets = [
    "linux_arm64",
    "darwin_amd64",
    "darwin_arm64",
+   "freebsd_amd64",
+   "freebsd_arm64",
 ]
 
 # loop through and build all targets
