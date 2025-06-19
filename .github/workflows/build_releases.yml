@@ -12,7 +12,7 @@ env:
 
 jobs:
   build-all:
-    runs-on: windows-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout Backend Repo
         uses: actions/checkout@v4
@@ -28,10 +28,10 @@ jobs:
 
       - name: Build All
         run: |
-          .\build_release.ps1
+          python ./build_release.py
 
       - name: Save Zip of all targets
         uses: actions/upload-artifact@v4
         with:
           name: apc-p15-tool-release
-          path: .\_out\_release
+          path: ./_out/_release
