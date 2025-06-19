@@ -171,6 +171,15 @@ separate script.
 
 ![Cert Warden with APC P15 Tool](https://raw.githubusercontent.com/gregtwallace/apc-p15-tool/main/img/apc-p15-tool.png)
 
+## Building
+
+Python3, Go, and git all must be installed to run the build script.
+
+Once the dependencies are installed, clone this repo and run 
+`python build_release.py`. If you only want to build for certain OS or
+ARCH targets, edit the `targets` array in the `build_release.py` file
+before running it.
+
 ## Links
 
 @Owl-Tec's write up using this tool with ACDS: 

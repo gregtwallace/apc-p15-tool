@@ -8,6 +8,20 @@ import tarfile
 # output path (relative to this script)
 outRelativeDir = "_out"
 
+# target strings must be in the format:
+#   `GOOS_GOARCH`
+# see: https://github.com/golang/go/blob/master/src/internal/syslist/syslist.go
+# or unofficially: https://gist.github.com/asukakenji/f15ba7e588ac42795f421b48b8aede63
+targets = [
+   "windows_amd64",
+   "linux_amd64",
+   "linux_arm64",
+   "darwin_amd64",
+   "darwin_arm64",
+   "freebsd_amd64",
+   "freebsd_arm64",
+]
+
 ###
 
 # Script
@@ -24,17 +38,6 @@ os.makedirs(releaseDir)
 
 # get version number / tag
 gitTag = subprocess.check_output("git describe --tags --abbrev=0").decode('utf-8').strip()
-
-# # GOOS_GOARCH to build for
-targets = [
-   "windows_amd64",
-   "linux_amd64",
-   "linux_arm64",
-   "darwin_amd64",
-   "darwin_arm64",
-   "freebsd_amd64",
-   "freebsd_arm64",
-]
 
 # loop through and build all targets
 for target in targets:
