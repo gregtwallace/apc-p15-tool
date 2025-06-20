@@ -1,5 +1,20 @@
 # APC P15 Tool Changelog
 
+## [v1.2.3] - 2025-06-19
+
+Minor updates to the application. Large updates to the build process to
+improve building, releasing, and maintainability.
+
+- Go updated to 1.24.4 and all dependencies updated.
+- Added FreeBSD arm64 and amd64 builds.
+- Build process overhauled for simplicity. Build is now OS agnostic. PowerShell
+  script was removed and replaced with a python script.
+- Build instructions added to README.
+- GitHub build action now only runs in one Ubuntu container and cross-compiles.
+- Release windows and macos as zip files and all others as gztar.
+- Add file permissions for non-windows and non-macos releases.
+
+
 ## [v1.2.2] - 2025-04-22
 
 All dependencies updated.
