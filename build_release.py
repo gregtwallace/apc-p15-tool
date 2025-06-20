@@ -37,7 +37,7 @@ os.makedirs(outBaseDir)
 os.makedirs(releaseDir)
 
 # get version number / tag
-gitTag = subprocess.check_output("git describe --tags --abbrev=0").decode('utf-8').strip()
+gitTag = subprocess.check_output(["git", "describe", "--tags", "--abbrev=0"]).decode('utf-8').strip()
 
 # loop through and build all targets
 for target in targets:
@@ -60,8 +60,8 @@ for target in targets:
     extension = ".exe"
 
   # build binary and install only binary
-  subprocess.run(f"go build -o {targetOutDir}/apc-p15-tool{extension} ./cmd/tool")
-  subprocess.run(f"go build -o {targetOutDir}/apc-p15-install{extension} ./cmd/install_only")
+  subprocess.run(["go", "build", "-o", f"{targetOutDir}/apc-p15-tool{extension}", "./cmd/tool"])
+  subprocess.run(["go", "build", "-o", f"{targetOutDir}/apc-p15-install{extension}", "./cmd/install_only"])
 
   # copy other important files for release
   shutil.copy("README.md", targetOutDir)
