@@ -10,8 +10,8 @@ import (
 // pkcs15KeyCert holds the data for a key and certificate pair; it provides
 // various methods to transform pkcs15 data
 type pkcs15KeyCert struct {
+	Cert *x509.Certificate
 	key  crypto.PrivateKey
-	cert *x509.Certificate
 	// store the encrypted enveloped Private Key for re-use
 	envelopedPrivateKey []byte
 }
@@ -31,6 +31,31 @@ const (
 
 	KeyTypeUnknown
 )
+
+// String returns the private key type in a log friendly string format.
+func (keyType KeyType) String() string {
+	switch keyType {
+	case KeyTypeRSA1024:
+		return "RSA 1024-bit"
+	case KeyTypeRSA2048:
+		return "RSA 2048-bit"
+	case KeyTypeRSA3072:
+		return "RSA 3072-bit"
+	case KeyTypeRSA4096:
+		return "RSA 4096-bit"
+
+	case KeyTypeECP256:
+		return "ECDSA P-256"
+	case KeyTypeECP384:
+		return "ECDSA P-384"
+	case KeyTypeECP521:
+		return "ECDSA P-521"
+
+	default:
+	}
+
+	return "unknown key type"
+}
 
 // KeyType returns the private key type
 func (p15 *pkcs15KeyCert) KeyType() KeyType {
@@ -85,7 +110,7 @@ func ParsePEMToPKCS15(keyPem, certPem []byte) (*pkcs15KeyCert, error) {
 	// create p15 struct
 	p15 := &pkcs15KeyCert{
 		key:  key,
-		cert: cert,
+		Cert: cert,
 	}
 
 	// pre-calculate encrypted envelope

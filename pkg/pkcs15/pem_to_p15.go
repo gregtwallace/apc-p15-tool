@@ -43,9 +43,9 @@ func (p15 *pkcs15KeyCert) ToP15KeyCert() (keyCert []byte, err error) {
 					// CommonKeyAttributes - accessFlags (trailing 0s will drop)
 					asn1obj.BitString([]byte{byte(0b10110000)}),
 					// CommonKeyAttributes - startDate
-					asn1obj.GeneralizedTime(p15.cert.NotBefore),
+					asn1obj.GeneralizedTime(p15.Cert.NotBefore),
 					// CommonKeyAttributes - [0] endDate
-					asn1obj.GeneralizedTimeExplicitValue(0, p15.cert.NotAfter),
+					asn1obj.GeneralizedTimeExplicitValue(0, p15.Cert.NotAfter),
 				}),
 				// ObjectValue - indirect-protected
 				asn1obj.ExplicitCompound(1, [][]byte{
@@ -74,9 +74,9 @@ func (p15 *pkcs15KeyCert) ToP15KeyCert() (keyCert []byte, err error) {
 					// CommonKeyAttributes - accessFlags (trailing 0s will drop)
 					asn1obj.BitString([]byte{byte(0b10110000)}),
 					// CommonKeyAttributes - startDate
-					asn1obj.GeneralizedTime(p15.cert.NotBefore),
+					asn1obj.GeneralizedTime(p15.Cert.NotBefore),
 					// CommonKeyAttributes - [0] endDate
-					asn1obj.GeneralizedTimeExplicitValue(0, p15.cert.NotAfter),
+					asn1obj.GeneralizedTimeExplicitValue(0, p15.Cert.NotAfter),
 				}),
 				// ObjectValue - indirect-protected
 				asn1obj.ExplicitCompound(1, [][]byte{
@@ -114,15 +114,15 @@ func (p15 *pkcs15KeyCert) ToP15KeyCert() (keyCert []byte, err error) {
 				p15.keyIdInt9(),
 			}),
 			// CommonKeyAttributes - startDate
-			asn1obj.GeneralizedTime(p15.cert.NotBefore),
+			asn1obj.GeneralizedTime(p15.Cert.NotBefore),
 			// CommonKeyAttributes - [4] endDate
-			asn1obj.GeneralizedTimeExplicitValue(4, p15.cert.NotAfter),
+			asn1obj.GeneralizedTimeExplicitValue(4, p15.Cert.NotAfter),
 		}),
 		// actual certificate itself
 		asn1obj.ExplicitCompound(1, [][]byte{
 			asn1obj.Sequence([][]byte{
 				asn1obj.ExplicitCompound(0, [][]byte{
-					p15.cert.Raw,
+					p15.Cert.Raw,
 				}),
 			}),
 		}),

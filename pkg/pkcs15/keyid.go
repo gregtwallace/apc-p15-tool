@@ -15,7 +15,7 @@ func (p15 *pkcs15KeyCert) keyId() []byte {
 
 	// SHA-1 Hash
 	hasher := sha1.New()
-	_, err := hasher.Write(p15.cert.RawSubjectPublicKeyInfo)
+	_, err := hasher.Write(p15.Cert.RawSubjectPublicKeyInfo)
 	if err != nil {
 		panic(err)
 	}
@@ -46,9 +46,9 @@ func (p15 *pkcs15KeyCert) keyIdInt3() []byte {
 	// object to hash
 	hashObj := asn1obj.Sequence([][]byte{
 		// issuerDistinguishedName
-		p15.cert.RawIssuer,
+		p15.Cert.RawIssuer,
 		// serialNumber
-		asn1obj.Integer(p15.cert.SerialNumber),
+		asn1obj.Integer(p15.Cert.SerialNumber),
 	})
 
 	// SHA-1 Hash
@@ -74,7 +74,7 @@ func (p15 *pkcs15KeyCert) keyIdInt6() []byte {
 
 	// SHA-1 Hash
 	hasher := sha1.New()
-	_, err := hasher.Write(p15.cert.RawIssuer)
+	_, err := hasher.Write(p15.Cert.RawIssuer)
 	if err != nil {
 		panic(err)
 	}
@@ -95,7 +95,7 @@ func (p15 *pkcs15KeyCert) keyIdInt7() []byte {
 
 	// SHA-1 Hash
 	hasher := sha1.New()
-	_, err := hasher.Write(p15.cert.RawSubject)
+	_, err := hasher.Write(p15.Cert.RawSubject)
 	if err != nil {
 		panic(err)
 	}
@@ -168,7 +168,7 @@ func (p15 *pkcs15KeyCert) keyIdInt9() []byte {
 	// to be ~ 1 hour ish BEFORE the cert was even created. Key would also
 	// obviously have to be created prior to the cert creation.
 	time := make([]byte, 4)
-	binary.BigEndian.PutUint32(time, uint32(p15.cert.NotBefore.Unix()))
+	binary.BigEndian.PutUint32(time, uint32(p15.Cert.NotBefore.Unix()))
 	publicKeyPacket = append(publicKeyPacket, time...)
 
 	// the next part is key type specific

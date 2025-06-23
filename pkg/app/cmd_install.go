@@ -145,7 +145,7 @@ func (app *app) cmdInstall(cmdCtx context.Context, args []string) error {
 		// verify cert is the correct one
 		certVerified := bytes.Equal(leafCert.Raw, pemBlock.Bytes)
 		if !certVerified {
-			return errors.New("install: web ui leaf cert does not match new cert")
+			return errors.New("install: web ui leaf cert does not match new cert (your cert may not be compatible with NMC; check for WARNINGs in this tool's output)")
 		}
 
 		app.stdLogger.Println("install: ups web ui cert verified")
