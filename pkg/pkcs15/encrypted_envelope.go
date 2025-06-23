@@ -25,7 +25,7 @@ const (
 // params expected in the APC file.
 func (p15 *pkcs15KeyCert) computeEncryptedKeyEnvelope() error {
 	// if computation already performed, this is a no-op (keep existing envelope)
-	if p15.envelopedPrivateKey != nil && len(p15.envelopedPrivateKey) != 0 {
+	if len(p15.envelopedPrivateKey) > 0 {
 		return nil
 	}
 
