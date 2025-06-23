@@ -53,12 +53,13 @@ This project aims to solve all of these problems by accepting the most
 common key and cert file format (PEM) and by being 100% open source
 and licensed under the GPL-3.0 license.
 
-## Compatibility Notice
-
-Both NMC2 and NMC3 devices should be fully supported. However, I have one
-NMC2 device in a home lab and have no way to guarantee success in all cases.
-
 ### Key Types and Sizes
+
+Ensure you select an appropriate key!
+
+NMC2 is extremely picky about the key type and size it supports. NMC3 is a bit
+more flexible. Beware, some ACME clients will generate an ECDSA key by default
+which is NOT supported by NMC2.
 
 NMC2:
 - RSA 1,024, 2,048, 3,072* bit lengths.
@@ -80,22 +81,60 @@ NMC3*:
 this size if possible. Most (all?) public ACME services won't accept keys 
 of this size anyway.
 
-### General Troubleshooting
+### Compatibility Notice
+
+Both NMC2 and NMC3 devices should be fully supported. However, I have one
+NMC2 device in a home lab and have no way to guarantee success in all cases.
 
 My setup (and therefore the testing setup) is:
 - APC Smart-UPS 1500VA RM 2U SUA1500RM2U (Firmware Revision 667.18.D)
 - AP9631 NMC2 Hardware Revision 05 running AOS v7.1.2 and Boot Monitor 
   v1.0.9.
 
-If you have trouble, your first step should be to update your NMC's firmware.
-Many issues with this tool will be resolved simply by updating to the newest
-firmware.
+Generally, if there is a compatibility issue, there is a good chance you will
+not see an error. Rather, the NMC will silently fail and you'll only know 
+something went wrong because the NMC's certificate didn't update, or it regenerated
+a self-signed certificate that you'll see upon your next connection attempt. 
+I've tried to add some `WARNING` messages to the tool to indicate what might
+be going wrong, but the list is definitely not exhaustive.
 
-If you have a problem after that, please post the log in an issue and I can 
-try to fix it but it may be difficult without your particular hardware to 
-test with.
+### Troubleshooting
 
-In particular, if you are experiencing `ssh: handshake failed:` first try
+Suggested troubleshooting steps:
+- Review the `Key Types and Sizes` and `Compatibility Notice` sections of this
+  README.
+- Update your NMC's firmware to the latest version.
+- Read this tool's output, look specifically for any `WARNING` messages and
+  adjust your certificate accordingly.
+- Test using an RSA 2048 bit key to obtain a certificate from Let's Encrypt.
+  Their certificates are known to work with NMC.
+- Use the official NMC Security Wizard to verify you can create a working
+  certificate and load it into your NMC. If the official tool does not work
+  switching to this tool won't help.
+
+If you have tried all of these steps and are still experiencing a problem,
+you may open an Issue on GitHub. 
+
+Include:
+- The full command you are running that is causing the problem. 
+- The full log of this tool's output when you run the command. Append the
+  `--debug` flag to your command to get the debug output.
+
+Keep in mind, I am one person with one specific hardware setup. I may not
+be able to help you.
+
+#### NMC3 Install `ssh: parse error in message type 53` Error
+
+Configuring a `System Message` on an NMC3 breaks the install function. I do
+not have an NMC3 and after doing some code review it is highly unlikely I'll
+be able to fix this. Don't use a `System Message` if the install feature is
+important to you.
+
+see: https://github.com/gregtwallace/apc-p15-tool/issues/14
+
+#### Install `ssh: handshake failed` Error
+
+If you are experiencing `ssh: handshake failed:` first try
 using the `--insecurecipher` flag. If this works, you should upgrade your
 NMC to a newer firmware which includes secure ciphers. You should NOT automate
 your environment using this flag as SSH over these ciphers is broken and
