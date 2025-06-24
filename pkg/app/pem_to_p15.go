@@ -118,9 +118,6 @@ func (app *app) pemToAPCP15(keyPem, certPem []byte, parentCmdName string) (keyFi
 		}
 	}
 
-	// if support by 2, check 2 list
-	// if not found on 2 list, check 3 list
-
 	// check validity dates
 	if time.Now().Before(p15.Cert.NotBefore) {
 		app.stdLogger.Printf("WARNING: %s: Current time (%s) is before certificate's NotBefore time (%s).",
