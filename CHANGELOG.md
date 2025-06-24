@@ -1,5 +1,19 @@
 # APC P15 Tool Changelog
 
+## [v1.3.0] - 2025-06-23
+
+This release attempts to detect and warn of possible incompatibilies with a
+spcecified certificate. NMCs do not warn or error when a bad file is installed,
+instead they silently fail and generally just generate a new self-signed
+certificate. This release checks some properties of the specified certificate
+and produces warning messages that can be referenced if the cert installation
+appears to work but ultimately doesn't prododuce the expected result.
+
+- Add warnings based on key type, signature algorithm, validity dates, and
+  extensions.
+- Minor lint.
+
+
 ## [v1.2.3] - 2025-06-19
 
 Minor updates to the application. Large updates to the build process to
