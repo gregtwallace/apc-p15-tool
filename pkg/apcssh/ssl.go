@@ -33,7 +33,7 @@ func (cli *Client) InstallSSLCert(keyP15 []byte, certPem []byte, keyCertP15 []by
 // command `ssl`. This command is not present on older devices (e.g., NMC2) or firmwares.
 func (cli *Client) installSSLCertModern(keyP15 []byte, certPem []byte) error {
 	// fail if required data isn't present
-	if keyP15 == nil || len(keyP15) <= 0 || certPem == nil || len(certPem) <= 0 {
+	if len(keyP15) <= 0 || len(certPem) <= 0 {
 		return errSSLMissingData
 	}
 
@@ -72,7 +72,7 @@ func (cli *Client) installSSLCertModern(keyP15 []byte, certPem []byte) error {
 // firmwares that do not support the `ssl` command.
 func (cli *Client) installSSLCertLegacy(keyCertP15 []byte) error {
 	// fail if required data isn't present
-	if keyCertP15 == nil || len(keyCertP15) <= 0 {
+	if len(keyCertP15) <= 0 {
 		return errSSLMissingData
 	}
 
