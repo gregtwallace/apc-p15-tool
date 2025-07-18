@@ -1,5 +1,12 @@
 # APC P15 Tool Changelog
 
+## [v1.3.1] - 2025-07-17
+
+- Add MD5 hash of the SSH key to the error output when SSH key verification
+  fails. MD5 hash cannot be used as the fingerprint value, but it can help
+  verify the line is currently secure before copying the sha256 value.
+
+
 ## [v1.3.0] - 2025-06-23
 
 This release attempts to detect and warn of possible incompatibilies with a
