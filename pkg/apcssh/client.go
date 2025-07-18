@@ -1,6 +1,8 @@
 package apcssh
 
 import (
+	"bytes"
+	"crypto/md5"
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
@@ -49,13 +51,40 @@ func New(cfg *Config) (*Client, error) {
 		}
 		actualHash := hasher.Sum(nil)
 
-		// log fingerprint for debugging
+		// convert to expected format for comparison
 		actualHashB64 := base64.RawStdEncoding.EncodeToString(actualHash)
 		actualHashHex := hex.EncodeToString(actualHash)
 
 		// check for fingerprint match (b64 or hex)
 		if actualHashB64 != cfg.ServerFingerprint && actualHashHex != cfg.ServerFingerprint {
-			return fmt.Errorf("apcssh: server returned wrong fingerprint (b64: %s ; hex: %s)", actualHashB64, actualHashHex)
+			// calculate server's key's MD5
+			// MD5 CANNOT be used in the config as collisions are too common, however, this
+			// is the value shown in the NMC web interface, so it may be useful to users for
+			// some level of assurance
+			hasher = md5.New()
+			_, err = hasher.Write(key.Marshal())
+			if err != nil {
+				return err
+			}
+			md5ActualHash := hasher.Sum(nil)
+
+			md5ActualHashHex := string(hex.EncodeToString(md5ActualHash))
+
+			// add colons for copy/paste convenience since they exist in the webui
+			var buffer bytes.Buffer
+			n_1 := 1
+			l_1 := len(md5ActualHashHex) - 1
+			for i, rune := range md5ActualHashHex {
+				buffer.WriteRune(rune)
+				if i%2 == n_1 && i != l_1 {
+					buffer.WriteRune(':')
+				}
+			}
+			md5ActualHashHex = buffer.String()
+
+			// return detailed info for convenience and debugging
+			return fmt.Errorf("apcssh: server returned wrong sha256 fingerprint (b64: %s ; hex: %s ; "+
+				"md5 hex is: %s , but is not acceptable in the fingerprint parameter)", actualHashB64, actualHashHex, md5ActualHashHex)
 		}
 
 		return nil
