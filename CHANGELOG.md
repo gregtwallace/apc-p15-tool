@@ -1,5 +1,10 @@
 # APC P15 Tool Changelog
 
+## [v1.3.2] - 2025-09-10
+
+Update to latest Go version and latest versions of all dependencies.
+
+
 ## [v1.3.1] - 2025-07-17
 
 - Add MD5 hash of the SSH key to the error output when SSH key verification
