@@ -3,12 +3,12 @@ module apc-p15-tool
 go 1.25.1
 
 require (
-	github.com/peterbourgon/ff/v4 v4.0.0-alpha.4
+	github.com/peterbourgon/ff/v4 v4.0.0-beta.1
 	github.com/sigurn/crc16 v0.0.0-20240131213347-83fcde1e29d1
-	golang.org/x/crypto v0.39.0
+	golang.org/x/crypto v0.42.0
 )
 
-require golang.org/x/sys v0.33.0 // indirect
+require golang.org/x/sys v0.36.0 // indirect
 
 replace apc-p15-tool/cmd/install_only => /cmd/install_only
 
