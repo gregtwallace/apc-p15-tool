@@ -1,6 +1,6 @@
 module apc-p15-tool
 
-go 1.25.1
+go 1.25.3
 
 require (
 	github.com/peterbourgon/ff/v4 v4.0.0-beta.1
