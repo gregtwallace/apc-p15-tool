@@ -35,21 +35,26 @@ targets = [
 ###
 
 # Function to get current commit hash without needing git executable or lib
-# https://stackoverflow.com/a/68215738/7572076
-def get_commit(required):
-    try:
-      git_folder = Path('./.git')
-      head_name = Path(git_folder, 'HEAD').read_text().split('\n')[0].split(' ')[-1]
-      head_ref = Path(git_folder,head_name)
-      commit = head_ref.read_text().replace('\n','')
+# Modified version of: https://stackoverflow.com/a/68215738/7572076
+def get_commit():
+  git_folder = Path('./.git')
+  head_content = Path(git_folder, 'HEAD').read_text().split('\n')[0]
+  commitRegex = re.compile(r"^[a-fA-F0-9]{40}$")
 
-      return commit
+  # HEAD references another file in ref
+  if head_content.startswith("ref: "):
+    head_name = head_content.split(' ')[-1]
+    head_ref = Path(git_folder,head_name)
+    ref_file_content = head_ref.read_text().replace('\n','')
 
-    except Exception as err:
-      if required:
-        raise err
+    if re.match(commitRegex, ref_file_content):
+      return ref_file_content
 
-      return ""
+  # HEAD has a commit in it (such as for a tag)
+  if re.match(commitRegex, head_content):
+    return head_content
+
+  return ""
 
 # Main Script
 print("initializing apc-p15-tool build script")
@@ -69,21 +74,25 @@ versionString = ""
 versionPattern = re.compile(r"appVersion = \"([0-9]+\.[0-9]+\.[0-9]+)\"")
 
 with open('./pkg/app/app.go') as appGoFile:
-    for line in appGoFile:
-      match = re.search(versionPattern, line)
-      if match != None:
-        versionString = match.group(1)
-        break
+  for line in appGoFile:
+    match = re.search(versionPattern, line)
+    if match != None:
+      versionString = match.group(1)
+      break
 
 if versionString == "":
   print("aborting: failed to parse version number")
   exit(-1)
 
 # try to get hash
-gitHead = get_commit(args.gitrequired)
-gitHeadShort = gitHead[:7]
-if gitHeadShort:
-  versionString += "_(" + gitHeadShort + ")"
+gitHead = get_commit()
+if gitHead != "":
+  versionString += "_(" + gitHead[:7] + ")"
+else:
+  print("failed to get git hash")
+  if args.gitrequired:
+    print("aborting: git hash is required by --gitrequired")
+    exit(-1)
 
 #
 print("building apc-p15-tool version", versionString)
