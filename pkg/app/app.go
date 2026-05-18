@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	appVersion = "1.3.4"
+	appVersion = "1.3.5"
 )
 
 // struct for receivers to use common app pieces

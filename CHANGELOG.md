@@ -1,5 +1,11 @@
 # APC P15 Tool Changelog
 
+## [v1.3.5] - 2026-05-18
+
+Update to latest Go version and latest versions of all dependencies.
+Include git commit hash with builds.
+
+
 ## [v1.3.4] - 2026-03-06
 
 Update to latest Go version and latest versions of all dependencies.
