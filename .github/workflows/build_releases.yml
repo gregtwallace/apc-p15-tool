@@ -21,7 +21,6 @@ jobs:
           fetch-depth: 1
           fetch-tags: true
 
-
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
@@ -29,7 +28,7 @@ jobs:
 
       - name: Build All
         run: |
-          python ./build_release.py
+          python ./build_release.py --gitrequired
 
       - name: Save Zip of all targets
         uses: actions/upload-artifact@v7
