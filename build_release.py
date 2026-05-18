@@ -1,10 +1,18 @@
 #!/usr/bin/env python3
+import argparse
 import os.path
 from pathlib import Path
 import re
 import shutil
 import subprocess
 import tarfile
+
+# Usage
+# python3 ./build_release.py [--gitrequired]
+
+# if the gitrequired flag is used, the script will crash if it fails to get the current
+# git commit
+
 
 # Configuration
 # output path (relative to this script)
@@ -28,7 +36,7 @@ targets = [
 
 # Function to get current commit hash without needing git executable or lib
 # https://stackoverflow.com/a/68215738/7572076
-def get_commit():
+def get_commit(required):
     try:
       git_folder = Path('./.git')
       head_name = Path(git_folder, 'HEAD').read_text().split('\n')[0].split(' ')[-1]
@@ -37,16 +45,24 @@ def get_commit():
 
       return commit
 
-    except:
+    except Exception as err:
+      if required:
+        raise err
+
       return ""
 
-# Script
+# Main Script
 print("initializing apc-p15-tool build script")
 
 # relative dir is root
 scriptDir = dirname = os.path.dirname(__file__)
 outBaseDir = os.path.join(scriptDir, outRelativeDir)
 releaseDir = os.path.join(outBaseDir, "_release")
+
+# use parser to check for git required flag
+parser = argparse.ArgumentParser()
+parser.add_argument('--gitrequired', action='store_true')
+args = parser.parse_args()
 
 # get version number
 versionString = ""
@@ -64,7 +80,7 @@ if versionString == "":
   exit(-1)
 
 # try to get hash
-gitHead = get_commit()
+gitHead = get_commit(args.gitrequired)
 gitHeadShort = gitHead[:7]
 if gitHeadShort:
   versionString += "_(" + gitHeadShort + ")"
