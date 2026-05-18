@@ -18,7 +18,9 @@ jobs:
         with:
           repository: gregtwallace/apc-p15-tool
           ref: ${{ env.GITHUB_REF }}
-          fetch-depth: 0
+          fetch-depth: 1
+          fetch-tags: true
+
 
       - name: Set up Go
         uses: actions/setup-go@v6
