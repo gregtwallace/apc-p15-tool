@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os.path
+from pathlib import Path
 import re
 import shutil
 import subprocess
@@ -25,6 +26,20 @@ targets = [
 
 ###
 
+# Function to get current commit hash without needing git executable or lib
+# https://stackoverflow.com/a/68215738/7572076
+def get_commit():
+    try:
+      git_folder = Path('./.git')
+      head_name = Path(git_folder, 'HEAD').read_text().split('\n')[0].split(' ')[-1]
+      head_ref = Path(git_folder,head_name)
+      commit = head_ref.read_text().replace('\n','')
+
+      return commit
+
+    except:
+      return ""
+
 # Script
 print("initializing apc-p15-tool build script")
 
@@ -48,6 +63,13 @@ if versionString == "":
   print("aborting: failed to parse version number")
   exit(-1)
 
+# try to get hash
+gitHead = get_commit()
+gitHeadShort = gitHead[:7]
+if gitHeadShort:
+  versionString += "_(" + gitHeadShort + ")"
+
+#
 print("building apc-p15-tool version", versionString)
 
 # recreate paths
@@ -87,6 +109,9 @@ for target in targets:
   shutil.copy("README.md", targetOutDir)
   shutil.copy("CHANGELOG.md", targetOutDir)
   shutil.copy("LICENSE.md", targetOutDir)
+  if gitHead:
+    with open(targetOutDir + "/HEAD", "a") as f:
+      f.write(gitHead)
 
   # compress release file
   # special case for windows & mac to use zip format
