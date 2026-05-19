@@ -16,7 +16,7 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v6
         with:
-          repository: gregtwallace/apc-p15-tool
+          repository: ${{ github.repository }}
           ref: ${{ env.GITHUB_REF }}
           fetch-depth: 1
           fetch-tags: true
