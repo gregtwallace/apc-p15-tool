@@ -38,10 +38,10 @@ func (p15 *pkcs15KeyCert) ToP15KeyCert() (keyCert []byte, err error) {
 				asn1obj.Sequence([][]byte{
 					// CommonKeyAttributes - iD - uses keyId that is SHA1( SubjectPublicKeyInfo SEQUENCE )
 					asn1obj.OctetString(p15.keyId()),
-					// CommonKeyAttributes - usage (trailing 0s will drop)
-					asn1obj.BitString([]byte{byte(0b11100010)}),
-					// CommonKeyAttributes - accessFlags (trailing 0s will drop)
-					asn1obj.BitString([]byte{byte(0b10110000)}),
+					// CommonKeyAttributes - usage
+					asn1obj.BitString("1110001"),
+					// CommonKeyAttributes - accessFlags
+					asn1obj.BitString("1011"),
 					// CommonKeyAttributes - startDate
 					asn1obj.GeneralizedTime(p15.Cert.NotBefore),
 					// CommonKeyAttributes - [0] endDate
@@ -69,10 +69,10 @@ func (p15 *pkcs15KeyCert) ToP15KeyCert() (keyCert []byte, err error) {
 				asn1obj.Sequence([][]byte{
 					// CommonKeyAttributes - iD - uses keyId that is SHA1( SubjectPublicKeyInfo SEQUENCE )
 					asn1obj.OctetString(p15.keyId()),
-					// CommonKeyAttributes - usage (trailing 0s will drop)
-					asn1obj.BitString([]byte{byte(0b00100010)}),
+					// CommonKeyAttributes - usage
+					asn1obj.BitString("0010001"),
 					// CommonKeyAttributes - accessFlags (trailing 0s will drop)
-					asn1obj.BitString([]byte{byte(0b10110000)}),
+					asn1obj.BitString("1011"),
 					// CommonKeyAttributes - startDate
 					asn1obj.GeneralizedTime(p15.Cert.NotBefore),
 					// CommonKeyAttributes - [0] endDate
@@ -185,10 +185,10 @@ func (p15 *pkcs15KeyCert) ToP15Key() (key []byte, err error) {
 				asn1obj.Sequence([][]byte{
 					// CommonKeyAttributes - iD - uses keyId that is SHA1( SubjectPublicKeyInfo SEQUENCE )
 					asn1obj.OctetString(p15.keyId()),
-					// CommonKeyAttributes - usage (trailing 0s will drop)
-					asn1obj.BitString([]byte{byte(0b11100010)}),
-					// CommonKeyAttributes - accessFlags (trailing 0s will drop)
-					asn1obj.BitString([]byte{byte(0b10110000)}),
+					// CommonKeyAttributes - usage
+					asn1obj.BitString("1110001"),
+					// CommonKeyAttributes - accessFlags
+					asn1obj.BitString("1011"),
 				}),
 
 				// Key IDs
@@ -223,8 +223,8 @@ func (p15 *pkcs15KeyCert) ToP15Key() (key []byte, err error) {
 				// CommonKeyAttributes
 				asn1obj.Sequence([][]byte{
 					asn1obj.OctetString(p15.keyId()),
-					asn1obj.BitString([]byte{byte(0b10000010)}),
-					asn1obj.BitString([]byte{byte(0b01000000)}),
+					asn1obj.BitString("1000001"),
+					asn1obj.BitString("01"),
 				}),
 
 				asn1obj.ExplicitCompound(1, [][]byte{
@@ -236,7 +236,7 @@ func (p15 *pkcs15KeyCert) ToP15Key() (key []byte, err error) {
 									asn1.NullBytes,
 								}),
 								// RSAPublicKey SubjectPublicKeyInfo
-								asn1obj.BitString(
+								asn1obj.BitStringFromBytes(
 									asn1obj.Sequence([][]byte{
 										asn1obj.Integer(privKey.PublicKey.N),
 										asn1obj.Integer(big.NewInt(int64(privKey.PublicKey.E))),
@@ -262,10 +262,10 @@ func (p15 *pkcs15KeyCert) ToP15Key() (key []byte, err error) {
 				asn1obj.Sequence([][]byte{
 					// CommonKeyAttributes - iD - uses keyId that is SHA1( SubjectPublicKeyInfo SEQUENCE )
 					asn1obj.OctetString(p15.keyId()),
-					// CommonKeyAttributes - usage (trailing 0s will drop)
-					asn1obj.BitString([]byte{byte(0b00100010)}),
-					// CommonKeyAttributes - accessFlags (trailing 0s will drop)
-					asn1obj.BitString([]byte{byte(0b10110000)}),
+					// CommonKeyAttributes - usage
+					asn1obj.BitString("0010001"),
+					// CommonKeyAttributes - accessFlags
+					asn1obj.BitString("1011"),
 				}),
 
 				// Key IDs
@@ -318,8 +318,8 @@ func (p15 *pkcs15KeyCert) ToP15Key() (key []byte, err error) {
 				// CommonKeyAttributes
 				asn1obj.Sequence([][]byte{
 					asn1obj.OctetString(p15.keyId()),
-					asn1obj.BitString([]byte{byte(0b00000010)}),
-					asn1obj.BitString([]byte{byte(0b01000000)}),
+					asn1obj.BitString("0000001"),
+					asn1obj.BitString("01"),
 				}),
 
 				asn1obj.ExplicitCompound(1, [][]byte{
@@ -330,7 +330,7 @@ func (p15 *pkcs15KeyCert) ToP15Key() (key []byte, err error) {
 									asn1obj.ObjectIdentifier(asn1obj.OIDecPublicKey),
 									asn1obj.ObjectIdentifier(curveOID),
 								}),
-								asn1obj.BitString(ecdhKey.Bytes()),
+								asn1obj.BitStringFromBytes(ecdhKey.Bytes()),
 							}),
 						}),
 					}),
